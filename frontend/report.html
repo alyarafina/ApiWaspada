@@ -2,307 +2,249 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Buat Laporan Kebakaran &mdash; ApiWaspada Kota Jambi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#DC2626" />
+  <title>Lapor Kebakaran — ApiWaspada Kota Jambi</title>
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
 </head>
-<body>
-  <!-- Navbar -->
-  <header class="navbar">
-    <div class="container navbar-inner">
-      <a href="/index.html" class="navbar-brand">
-        <img src="/assets/images/logo.svg" alt="Logo ApiWaspada Kota Jambi" />
-      </a>
-      <ul class="nav-links">
-        <li><a href="/index.html" class="nav-link">Beranda</a></li>
-        <li><a href="/report.html" class="nav-link active">Buat Laporan</a></li>
-        <li><a href="/tracking.html" class="nav-link">Lacak Laporan &amp; Peta</a></li>
-      </ul>
-      <div class="nav-actions">
-        <a href="/tracking.html" class="btn btn-secondary btn-sm">Lacak Status</a>
-        <a href="/login.html" class="btn btn-secondary btn-sm">Portal Petugas</a>
-      </div>
-    </div>
-  </header>
+<body data-area="public" data-page="report">
+  <script src="/assets/js/layout.js?v=20261112q"></script>
 
-  <main class="section" style="padding-top:2rem;">
+  <main>
     <div class="container">
-      <div style="margin-bottom:1.5rem;">
-        <div class="section-eyebrow">Pelaporan Masyarakat &amp; Deteksi Visual</div>
-        <h1 style="font-size:1.85rem; font-weight:800;">Formulir Pelaporan Dugaan Kebakaran</h1>
-        <p style="color:#64748B;">
-          Unggah foto kejadian atau gunakan kamera perangkat, tentukan titik lokasi di Kota Jambi,
-          dan sistem akan menganalisis indikasi visual api serta asap menggunakan YOLO.
-        </p>
+      <header class="page-hero">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/beranda.html">Beranda</a><i data-icon="chevron-right"></i><span>Lapor Kebakaran</span></nav>
+        <h1>Lapor kebakaran</h1>
+        <p>Pastikan Anda di <strong>tempat aman</strong>.</p>
+      </header>
+
+      <!-- Indikator kemajuan -->
+      <div class="progress-steps" id="reportProgress" aria-label="Kemajuan pengisian formulir">
+        <div class="progress-step" data-step="photo"><span class="bar"></span><span class="lbl"><span class="check"><i data-icon="check"></i></span>Foto</span></div>
+        <div class="progress-step" data-step="desc"><span class="bar"></span><span class="lbl"><span class="check"><i data-icon="check"></i></span>Keterangan</span></div>
+        <div class="progress-step" data-step="loc"><span class="bar"></span><span class="lbl"><span class="check"><i data-icon="check"></i></span>Lokasi</span></div>
       </div>
 
-      <!-- Status Modul AI -->
       <div id="aiStatusBanner" class="alert alert-info hidden"></div>
-      <div id="formAlert" class="alert alert-error hidden"></div>
+      <div id="formAlert" class="alert alert-error hidden" role="alert"></div>
 
-      <!-- Kartu Konfirmasi Sukses Laporan -->
-      <div id="reportSuccessCard" class="card hidden" style="margin-bottom:2rem; border:2px solid #16A34A; background:#F0FDF4;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
-          <div>
-            <span class="badge badge-completed" style="margin-bottom:0.5rem;">Laporan Berhasil Dikirim</span>
-            <h2 style="font-size:1.35rem; font-weight:800; color:#14532D;">
-              Terima kasih, laporan Anda telah tersimpan di database ApiWaspada
-            </h2>
-            <p style="font-size:0.92rem; color:#166534; margin-top:0.25rem;">
-              Simpan <strong>ID Laporan</strong> atau <strong>Kode Pelacakan</strong> di bawah ini untuk memantau progres verifikasi petugas.
-            </p>
-          </div>
-          <a id="btnTrackCreatedReport" href="/tracking.html" class="btn btn-primary">
-            Lacak Status Laporan Ini &rarr;
-          </a>
+      <!-- KARTU SUKSES -->
+      <section id="reportSuccessCard" class="card hidden report-success-card" aria-live="polite">
+        <div class="success-header">
+          <div class="success-icon"><i data-icon="check" class="ic-xl"></i></div>
+                    <h2>Laporan terkirim!</h2>
+          <p>Simpan kode ini untuk cek status.</p>
         </div>
-        <div class="grid-4" style="margin-top:1.25rem; background:#FFFFFF; padding:1rem; border-radius:8px; border:1px solid #BBF7D0;">
+
+        <div class="code-display">
+          <div class="detail-label">Kode pelacakan Anda</div>
+          <div id="createdTrackingCode" class="tracking-code">-</div>
+          <button type="button" class="btn btn-secondary btn-sm" data-copy-from="createdTrackingCode"><i data-icon="copy"></i> Salin kode</button>
+        </div>
+
+        <div class="grid-4 report-success-details">
           <div>
-            <div style="font-size:0.78rem; color:#64748B; font-weight:700;">ID LAPORAN</div>
-            <div id="createdReportId" style="font-size:1.15rem; font-weight:800; color:#0F172A;">-</div>
+            <div class="detail-label">ID laporan</div>
+            <div id="createdReportId" class="detail-value">-</div>
           </div>
           <div>
-            <div style="font-size:0.78rem; color:#64748B; font-weight:700;">KODE PELACAKAN</div>
-            <div id="createdTrackingCode" style="font-size:1.05rem; font-weight:800; color:#DC2626;">-</div>
+            <div class="detail-label">Waktu kirim</div>
+            <div id="createdTime" class="detail-value">-</div>
           </div>
-          <div>
-            <div style="font-size:0.78rem; color:#64748B; font-weight:700;">WAKTU PENGIRIMAN</div>
-            <div id="createdTime" style="font-size:0.92rem; font-weight:600;">-</div>
-          </div>
-          <div>
-            <div style="font-size:0.78rem; color:#64748B; font-weight:700;">STATUS LAPORAN</div>
-            <div id="createdStatusBadge" style="margin-top:0.2rem;">-</div>
+          <div style="grid-column: span 2">
+            <div class="detail-label">Status</div>
+            <div id="createdStatusBadge" class="detail-value">-</div>
           </div>
         </div>
-        <div style="margin-top:0.85rem; font-size:0.9rem;">
-          <strong>Ringkasan Hasil Deteksi AI:</strong> <span id="createdDetectionSummary">-</span>
+
+        <div class="success-detection-summary">
+          <strong>Hasil AI:</strong>
+          <span id="createdDetectionSummary">-</span>
         </div>
-      </div>
 
-      <!-- Form Utama -->
-      <form id="reportForm" class="grid-2" style="align-items:start;">
-        <!-- Kolom Kiri: Upload Foto, Kamera, & Deskripsi -->
-        <div class="card">
-          <h3 style="font-size:1.15rem; margin-bottom:1rem; border-bottom:1px solid #E2E8F0; padding-bottom:0.65rem;">
-            1. Bukti Foto &amp; Keterangan Kejadian
-          </h3>
+        <div class="success-actions">
+          <a id="btnTrackCreatedReport" href="/tracking.html" class="btn btn-primary btn-lg"><i data-icon="search"></i> Lacak laporan ini</a>
+          <button type="button" id="btnNewReport" class="btn btn-secondary btn-lg"><i data-icon="plus"></i> Buat laporan baru</button>
+        </div>
+      </section>
 
-          <div class="form-group">
-            <label class="form-label">
-              Foto Dugaan Kebakaran <span class="required">*</span>
-            </label>
-            <input
-              type="file"
-              id="imageInput"
-              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-              class="hidden"
-            />
-            <div id="uploadDropzone" class="upload-zone">
-              <div style="font-weight:700; color:#0F172A; font-size:1rem; margin-bottom:0.25rem;">
-                Klik untuk Memilih Foto atau Seret Gambar ke Sini
-              </div>
-              <div style="font-size:0.84rem; color:#64748B;">
-                Format yang didukung: <strong>JPG, JPEG, PNG</strong> (Maksimal 10 MB)
+      <!-- FORMULIR -->
+      <form id="reportForm" class="report-layout" novalidate>
+        <div class="col-left grid">
+          <!-- 1. FOTO -->
+          <section class="card form-section" id="sectionPhoto">
+            <div class="form-section-heading">
+              <span class="form-step">1</span>
+              <div>
+                <h2>Foto <span class="required">*</span></h2>
               </div>
             </div>
 
-            <div style="display:flex; gap:0.65rem; margin-top:0.75rem; flex-wrap:wrap;">
-              <button type="button" id="btnOpenCamera" class="btn btn-secondary btn-sm">
-                Ambil Foto dari Kamera Perangkat
-              </button>
-              <button type="button" id="btnPreviewAi" class="btn btn-outline-orange btn-sm">
-                Uji Deteksi Visual YOLO Terlebih Dahulu
-              </button>
+            <input type="file" id="imageInput" accept=".jpg,.jpeg,.png,image/jpeg,image/png" class="hidden" />
+
+            <div id="uploadDropzone" class="upload-zone" role="button" tabindex="0" aria-label="Pilih foto dari perangkat">
+              <span class="icon-tile"><i data-icon="image" class="ic-lg"></i></span>
+              <div class="upload-zone-title">Ketuk untuk pilih foto</div>
+              <div class="upload-zone-description">JPG / PNG, maks. 10 MB</div>
             </div>
 
-            <!-- Kamera Langsung (WebRTC) -->
-            <div id="cameraContainer" class="hidden" style="margin-top:1rem; background:#0F172A; padding:0.85rem; border-radius:8px; text-align:center;">
-              <video id="cameraVideo" autoplay playsinline style="width:100%; max-height:300px; border-radius:6px;"></video>
+            <div class="upload-actions">
+              <button type="button" id="btnOpenCamera" class="btn btn-dark"><i data-icon="camera"></i> Ambil foto dengan kamera</button>
+              <button type="button" id="btnPreviewAi" class="btn btn-outline-orange"><i data-icon="sparkles"></i> Cek foto dengan AI</button>
+            </div>
+
+            <div id="cameraContainer" class="hidden camera-container">
+              <video id="cameraVideo" autoplay playsinline muted></video>
               <canvas id="cameraCanvas" class="hidden"></canvas>
-              <div style="display:flex; justify-content:center; gap:0.75rem; margin-top:0.65rem;">
-                <button type="button" id="btnCapturePhoto" class="btn btn-primary btn-sm">Tangkap Foto</button>
-                <button type="button" id="btnCloseCamera" class="btn btn-secondary btn-sm">Tutup Kamera</button>
+              <div class="camera-actions">
+                <button type="button" id="btnCapturePhoto" class="btn btn-primary"><i data-icon="camera"></i> Jepret</button>
+                <button type="button" id="btnCloseCamera" class="btn btn-ghost-light"><i data-icon="x"></i> Tutup</button>
               </div>
             </div>
 
-            <!-- Preview Gambar -->
             <div id="imagePreviewWrapper" class="hidden">
               <div class="preview-container">
-                <img id="imagePreview" src="" alt="Preview Foto Laporan" />
+                <img id="imagePreview" src="" alt="Pratinjau foto laporan" />
               </div>
-              <div id="selectedFileInfo" class="form-hint" style="font-weight:600; color:#334155;"></div>
+              <div id="selectedFileInfo" class="form-hint selected-file-info"></div>
             </div>
-          </div>
+          </section>
 
-          <div class="form-group">
-            <label for="reporterName" class="form-label">
-              Nama Pelapor (Opsional &mdash; Dirahasiakan dari Publik)
-            </label>
-            <input
-              type="text"
-              id="reporterName"
-              class="form-control"
-              maxlength="120"
-              placeholder="Contoh: Warga Kec. Telanaipura (Kosongkan jika anonim)"
-            />
-            <div class="form-hint">
-              Informasi nama pelapor hanya dapat dilihat oleh petugas verifikasi resmi di dashboard.
+          <!-- 2. KETERANGAN -->
+          <section class="card form-section" id="sectionDesc">
+            <div class="form-section-heading">
+              <span class="form-step">2</span>
+              <div>
+                <h2>Keterangan</h2>
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label for="description" class="form-label">
-              Deskripsi Kejadian &amp; Patokan Lokasi <span class="required">*</span>
-            </label>
-            <textarea
-              id="description"
-              class="form-control"
-              rows="4"
-              minlength="5"
-              maxlength="1000"
-              required
-              placeholder="Jelaskan kondisi api/asap yang terlihat, objek yang terbakar (lahan/bangunan), serta patokan jalan di Kota Jambi..."
-            ></textarea>
-            <div style="display:flex; justify-content:space-between;" class="form-hint">
-              <span>Minimal 5 karakter, maksimal 1000 karakter.</span>
-              <span id="descCharCount">0 / 1000 karakter</span>
+            <div class="form-group">
+              <label for="description" class="form-label">Apa yang terjadi? <span class="required">*</span></label>
+              <textarea id="description" class="form-control" rows="5" minlength="5" maxlength="1000" required
+                placeholder="Contoh: Asap tebal dari lahan kosong di belakang SPBU Jl. Sudirman, api mulai mendekati rumah warga."></textarea>
+              <div class="form-hint description-counter">
+                <span>Minimal 5 karakter</span>
+                <span id="descCharCount">0 / 1000 karakter</span>
+              </div>
             </div>
-          </div>
+
+            <div class="form-group" style="margin-bottom:0">
+              <label for="reporterName" class="form-label">Nama Anda <span class="opt">(opsional)</span></label>
+              <div class="input-icon">
+                <i data-icon="user"></i>
+                <input type="text" id="reporterName" class="form-control" maxlength="120" autocomplete="name" placeholder="Contoh: Warga Telanaipura" />
+              </div>
+              <div class="form-hint"><i data-icon="lock"></i> Hanya dilihat petugas.</div>
+            </div>
+          </section>
         </div>
 
-        <!-- Kolom Kanan: Lokasi GPS & Peta Interaktif -->
-        <div class="card">
-          <h3 style="font-size:1.15rem; margin-bottom:1rem; border-bottom:1px solid #E2E8F0; padding-bottom:0.65rem;">
-            2. Koordinat Lokasi Kejadian (GIS Kota Jambi)
-          </h3>
-
-          <div style="display:flex; gap:0.65rem; flex-wrap:wrap; margin-bottom:1rem;">
-            <button type="button" id="btnGetGps" class="btn btn-primary btn-sm">
-              Ambil Lokasi GPS Saat Ini
-            </button>
-            <button type="button" id="btnSetJambiCenter" class="btn btn-secondary btn-sm">
-              Arahkan ke Pusat Kota Jambi
-            </button>
-          </div>
-
-          <div id="gpsStatusMsg" class="form-hint" style="margin-bottom:0.85rem; font-weight:600; color:#1E40AF;">
-            Klik tombol "Ambil Lokasi GPS Saat Ini" atau klik langsung titik kejadian pada peta di bawah.
-          </div>
-
-          <div class="grid-2" style="gap:0.85rem; margin-bottom:1rem;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label for="latitude" class="form-label">Latitude <span class="required">*</span></label>
-              <input
-                type="number"
-                step="any"
-                id="latitude"
-                class="form-control"
-                required
-                placeholder="-1.6101"
-              />
+        <div class="col-right grid">
+          <!-- 3. LOKASI -->
+          <section class="card form-section" id="sectionLoc">
+            <div class="form-section-heading">
+              <span class="form-step">3</span>
+              <div>
+                <h2>Lokasi <span class="required">*</span></h2>
+              </div>
             </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label for="longitude" class="form-label">Longitude <span class="required">*</span></label>
-              <input
-                type="number"
-                step="any"
-                id="longitude"
-                class="form-control"
-                required
-                placeholder="103.6131"
-              />
+
+            <div class="gps-actions">
+              <button type="button" id="btnGetGps" class="btn btn-primary"><i data-icon="crosshair"></i> Pakai lokasi saya</button>
+              <button type="button" id="btnSetJambiCenter" class="btn btn-secondary"><i data-icon="target"></i> Pusat Kota Jambi</button>
+            </div>
+
+            <div id="gpsStatusMsg" class="gps-status-message">Pakai GPS atau ketuk peta.</div>
+
+            <div id="reportPickerMap" class="map-box report-picker-map"></div>
+
+            <div class="grid-2 coordinate-grid">
+              <div class="form-group">
+                <label for="latitude" class="form-label">Latitude</label>
+                <input type="number" step="any" id="latitude" class="form-control" required inputmode="decimal" placeholder="-1.6101" />
+              </div>
+              <div class="form-group">
+                <label for="longitude" class="form-label">Longitude</label>
+                <input type="number" step="any" id="longitude" class="form-control" required inputmode="decimal" placeholder="103.6131" />
+              </div>
+            </div>
+          </section>
+
+          <!-- KIRIM -->
+          <div class="submit-panel">
+            <div class="card" style="padding:1rem">
+              <button type="submit" id="btnSubmitReport" class="btn btn-primary btn-lg submit-report-button"><i data-icon="send"></i> Kirim Laporan</button>
+              <p class="form-hint text-center" style="margin-top:.6rem">Foto dicek AI otomatis.</p>
             </div>
           </div>
-
-          <div id="reportPickerMap" class="map-box" style="height:310px; margin-bottom:1.15rem;"></div>
-
-          <div class="disclaimer-box" style="margin-bottom:1.25rem;">
-            "Hasil deteksi AI merupakan indikasi awal berdasarkan gambar yang diunggah dan bukan konfirmasi resmi kejadian kebakaran. Setiap laporan tetap memerlukan verifikasi petugas."
-          </div>
-
-          <button type="submit" id="btnSubmitReport" class="btn btn-primary btn-lg" style="width:100%;">
-            Kirim Laporan &amp; Jalankan Deteksi YOLO
-          </button>
         </div>
       </form>
 
-      <!-- Bagian Hasil Deteksi Visual YOLO -->
-      <section id="detectionResultSection" class="card hidden" style="margin-top:2rem;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem; border-bottom:1px solid #E2E8F0; padding-bottom:0.85rem;">
+      <!-- HASIL PEMERIKSAAN AI -->
+      <section id="detectionResultSection" class="card hidden detection-result-section" aria-live="polite">
+        <div class="detection-result-header">
           <div>
-            <div class="section-eyebrow">Hasil Analisis Computer Vision</div>
-            <h2 style="font-size:1.4rem; font-weight:800;">Hasil Deteksi Visual Api &amp; Asap (YOLO)</h2>
+            <h2><i data-icon="sparkles"></i> Hasil cek AI</h2>
           </div>
           <div id="resStatusBadge"></div>
         </div>
 
-        <div class="grid-3" style="margin-bottom:1.25rem;">
-          <div style="background:#F8FAFC; padding:0.9rem 1rem; border-radius:8px; border:1px solid #E2E8F0;">
-            <div style="font-size:0.78rem; color:#64748B; font-weight:700;">CONFIDENCE SCORE TERTINGGI</div>
-            <div id="resConfidenceVal" style="font-size:1.35rem; font-weight:800; color:#DC2626;">0.0%</div>
+
+        <div class="grid-2 detection-metrics">
+          <div class="detection-metric-card">
+            <div class="detail-label">Keyakinan AI</div>
+            <div id="resConfidenceVal" class="metric-value metric-red">0.0%</div>
           </div>
-          <div style="background:#F8FAFC; padding:0.9rem 1rem; border-radius:8px; border:1px solid #E2E8F0;">
-            <div style="font-size:0.78rem; color:#64748B; font-weight:700;">WAKTU PROSES INFERENSI</div>
-            <div id="resInferenceTime" style="font-size:1.35rem; font-weight:800; color:#0F172A;">0.0 ms</div>
-          </div>
-          <div style="background:#F8FAFC; padding:0.9rem 1rem; border-radius:8px; border:1px solid #E2E8F0;">
-            <div style="font-size:0.78rem; color:#64748B; font-weight:700;">KELAS DETEKSI D-FIRE</div>
-            <div style="font-size:0.95rem; font-weight:700; color:#334155; margin-top:0.2rem;">Fire (Api) &amp; Smoke (Asap)</div>
+          <div class="detection-metric-card">
+            <div class="detail-label">Waktu cek</div>
+            <div id="resInferenceTime" class="metric-value">0.0 ms</div>
           </div>
         </div>
 
-        <!-- Perbandingan Gambar Asli & Gambar Hasil Deteksi -->
-        <div class="grid-2" style="margin-bottom:1.5rem;">
+        <div class="grid-2 detection-images">
           <div>
-            <h4 style="font-size:0.92rem; margin-bottom:0.5rem; color:#334155;">Gambar Asli yang Diunggah</h4>
-            <div class="preview-container">
-              <img id="resOriginalImg" src="" alt="Gambar Asli" />
-            </div>
+            <h4>Foto asli</h4>
+            <div class="preview-container"><img id="resOriginalImg" src="" alt="Foto asli yang diunggah" /></div>
           </div>
           <div>
-            <h4 style="font-size:0.92rem; margin-bottom:0.5rem; color:#334155;">Gambar Hasil Visualisasi Bounding Box YOLO</h4>
-            <div class="preview-container">
-              <img id="resAnnotatedImg" src="" alt="Gambar Hasil Deteksi YOLO" />
-            </div>
+            <h4>Tanda dari AI</h4>
+            <div class="preview-container"><img id="resAnnotatedImg" src="" alt="Foto dengan kotak penanda hasil deteksi AI" /></div>
           </div>
         </div>
 
-        <!-- Tabel Rincian Bounding Box -->
-        <h4 style="font-size:0.96rem; margin-bottom:0.6rem;">Rincian Objek Terdeteksi (Bounding Box &amp; Confidence)</h4>
-        <div class="table-responsive" style="margin-bottom:1.25rem;">
+        <details class="tech-details">
+          <summary>Rincian teknis</summary>
+        <div class="table-responsive table-cards">
           <table class="data-table">
             <thead>
               <tr>
                 <th>No</th>
-                <th>Kelas Objek</th>
-                <th>Confidence Score</th>
-                <th>Koordinat Bounding Box [x1, y1, x2, y2]</th>
+                <th>Objek</th>
+                <th>Keyakinan</th>
+                <th>Posisi kotak [x1, y1, x2, y2]</th>
               </tr>
             </thead>
             <tbody id="resBboxTableBody"></tbody>
           </table>
         </div>
+        </details>
 
-        <div class="disclaimer-box">
-          <strong>Disclaimer Penggunaan AI:</strong>
-          "Hasil deteksi AI merupakan indikasi awal berdasarkan gambar yang diunggah dan bukan konfirmasi resmi kejadian kebakaran. Setiap laporan tetap memerlukan verifikasi petugas."
-        </div>
+        <p class="fine-print detection-disclaimer">Hasil deteksi AI merupakan indikasi awal berdasarkan gambar yang diunggah dan bukan konfirmasi resmi kejadian kebakaran. Setiap laporan tetap memerlukan verifikasi petugas.</p>
       </section>
     </div>
   </main>
 
-  <footer class="footer">
-    <div class="container" style="text-align:center;">
-      &copy; 2026 Prototype ApiWaspada Kota Jambi &bull; Sistem Cerdas Deteksi Visual Api &amp; Asap
-    </div>
-  </footer>
-
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/assets/js/config.js"></script>
-  <script src="/assets/js/utils.js"></script>
-  <script src="/assets/js/map.js"></script>
-  <script src="/assets/js/report.js"></script>
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261112q"></script>
+  <script src="/assets/js/map.js?v=20261112q"></script>
+  <script src="/assets/js/report.js?v=20261112q"></script>
+  <script src="/assets/js/report-ui.js?v=20261112q"></script>
 </body>
 </html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#DC2626" />
+  <title>Peta Laporan — ApiWaspada Kota Jambi</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+</head>
+<body data-area="public" data-page="map">
+  <script src="/assets/js/layout.js?v=20261112q"></script>
+
+  <main>
+    <div class="container">
+      <header class="page-hero">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/beranda.html">Beranda</a><i data-icon="chevron-right"></i><span>Peta Laporan</span></nav>
+        <h1>Peta laporan</h1>
+        <p>Ketuk penanda untuk melihat detail.</p>
+      </header>
+
+      <div class="chips" id="mapFilterChips" role="group" aria-label="Saring berdasarkan status" style="margin-bottom:1rem">
+        <button type="button" class="chip" data-status="" aria-pressed="true">Semua</button>
+        <button type="button" class="chip" data-status="pending" aria-pressed="false"><span class="legend-marker" style="background:#F59E0B"></span>Menunggu</button>
+        <button type="button" class="chip" data-status="verified" aria-pressed="false"><span class="legend-marker" style="background:#2563EB"></span>Terverifikasi</button>
+        <button type="button" class="chip" data-status="completed" aria-pressed="false"><span class="legend-marker" style="background:#16A34A"></span>Selesai</button>
+        <button type="button" class="chip" data-status="rejected" aria-pressed="false"><span class="legend-marker" style="background:#64748B"></span>Ditolak</button>
+      </div>
+
+      <div class="map-layout">
+        <div class="card" style="padding:.6rem">
+          <div id="publicDistributionMap" class="map-box map-tall"></div>
+        </div>
+
+        <aside class="card">
+          <div class="card-head" style="margin-bottom:.85rem">
+            <div>
+              <h2 class="card-title"><i data-icon="list"></i> Laporan terbaru</h2>
+              <p class="card-sub" id="mapListInfo">Memuat data&hellip;</p>
+            </div>
+          </div>
+          <div class="list-scroll">
+            <div class="report-list" id="publicReportList">
+              <div class="skeleton" style="height:88px"></div>
+              <div class="skeleton" style="height:88px"></div>
+              <div class="skeleton" style="height:88px"></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <p class="fine-print"><i data-icon="lock"></i> Nama pelapor tidak ditampilkan.</p>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261112q"></script>
+  <script src="/assets/js/map.js?v=20261112q"></script>
+  <script src="/assets/js/peta.js?v=20261112q"></script>
+</body>
+</html>

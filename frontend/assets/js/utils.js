@@ -37,10 +37,10 @@ function formatDateTimeWIB(isoString) {
 function getStatusBadgeHtml(status) {
   const s = String(status || "pending").toLowerCase();
   const map = {
-    pending: { cls: "badge-pending", label: "Pending (Menunggu Verifikasi)" },
-    verified: { cls: "badge-verified", label: "Verified (Terverifikasi)" },
-    rejected: { cls: "badge-rejected", label: "Rejected (Ditolak)" },
-    completed: { cls: "badge-completed", label: "Completed (Selesai)" },
+    pending: { cls: "badge-pending", label: "Menunggu Verifikasi" },
+    verified: { cls: "badge-verified", label: "Terverifikasi" },
+    rejected: { cls: "badge-rejected", label: "Ditolak" },
+    completed: { cls: "badge-completed", label: "Selesai Ditangani" },
   };
   const info = map[s] || { cls: "badge-pending", label: escapeHtml(status) };
   return `<span class="badge ${info.cls}"><span class="badge-dot"></span>${info.label}</span>`;

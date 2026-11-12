@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#DC2626" />
+  <meta name="description" content="ApiWaspada — laporkan dugaan kebakaran di Kota Jambi dengan foto dan lokasi. AI membantu memeriksa tanda api dan asap, petugas memverifikasi." />
+  <title>ApiWaspada — Lapor Kebakaran Kota Jambi</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+</head>
+<body data-area="public" data-page="home">
+  <script src="/assets/js/layout.js?v=20261112q"></script>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid hero-single">
+        <div>
+          <span class="hero-badge"><span class="pin"><i data-icon="pin"></i></span>Siaga Kebakaran Kota Jambi</span>
+          <h1>Lihat api atau asap?<br /><span class="accent">Laporkan dalam 1 menit.</span></h1>
+          <p class="hero-lead">
+            Cukup kirim <strong>foto</strong> dan <strong>lokasi</strong> kejadian. Kecerdasan buatan (AI) membantu
+            memeriksa tanda api &amp; asap, lalu petugas memverifikasi dan menindaklanjuti laporan Anda.
+          </p>
+          <div class="hero-cta">
+            <a href="/report.html" class="btn btn-primary btn-lg"><i data-icon="camera"></i> Laporkan Sekarang</a>
+            <a href="/tracking.html" class="btn btn-ghost-light btn-lg"><i data-icon="search"></i> Cek Status Laporan</a>
+          </div>
+          <div class="hero-trust">
+            <span><i data-icon="check"></i> Tanpa daftar akun</span>
+            <span><i data-icon="check"></i> Nama pelapor dirahasiakan</span>
+            <span><i data-icon="check"></i> Gratis</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DARURAT -->
+    <section class="emergency-strip">
+      <div class="container">
+        <div class="emergency-card">
+          <div class="lead">
+            <span class="icon-wrap"><i data-icon="siren" class="ic-lg"></i></span>
+            <div>
+              <strong>Api besar atau ada orang terjebak?</strong>
+              <span>Telepon layanan darurat dulu, kirim laporan setelah Anda aman.</span>
+            </div>
+          </div>
+          <div class="call-grid">
+            <a href="tel:113" class="call-btn primary"><strong>113</strong><span>Damkar</span></a>
+            <a href="tel:112" class="call-btn"><strong>112</strong><span>Darurat</span></a>
+            <a href="tel:110" class="call-btn"><strong>110</strong><span>Polisi</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARA MELAPOR -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head center">
+          <span class="eyebrow">Mudah &amp; cepat</span>
+          <h2 class="section-title">Cara melapor hanya 4 langkah</h2>
+          <p class="section-sub">Tidak perlu paham teknologi. Ikuti langkah sederhana di bawah ini.</p>
+        </div>
+        <div class="steps">
+          <div class="step-card card-hover">
+            <span class="num">1</span>
+            <div class="icon-tile"><i data-icon="camera" class="ic-lg"></i></div>
+            <h3>Foto kejadian</h3>
+            <p>Ambil foto api atau asap dari jarak aman, atau pilih foto dari galeri HP.</p>
+          </div>
+          <div class="step-card card-hover">
+            <span class="num">2</span>
+            <div class="icon-tile orange"><i data-icon="pin" class="ic-lg"></i></div>
+            <h3>Tandai lokasi</h3>
+            <p>Tekan tombol GPS atau ketuk titik lokasi di peta Kota Jambi.</p>
+          </div>
+          <div class="step-card card-hover">
+            <span class="num">3</span>
+            <div class="icon-tile dark"><i data-icon="sparkles" class="ic-lg"></i></div>
+            <h3>AI memeriksa</h3>
+            <p>Sistem otomatis mencari tanda api &amp; asap pada foto sebagai penilaian awal.</p>
+          </div>
+          <div class="step-card card-hover">
+            <span class="num">4</span>
+            <div class="icon-tile green"><i data-icon="shield" class="ic-lg"></i></div>
+            <h3>Petugas menindaklanjuti</h3>
+            <p>Simpan kode laporan Anda untuk memantau status verifikasi petugas.</p>
+          </div>
+        </div>
+        <div class="text-center" style="margin-top:1.5rem">
+          <a href="/panduan.html" class="btn btn-secondary"><i data-icon="book"></i> Baca panduan lengkap</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATUS SISTEM & PETA -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow"><span class="status-dot ok" id="homeLiveDot"></span> Langsung dari sistem</span>
+          <h2 class="section-title">Pantauan laporan di Kota Jambi</h2>
+        </div>
+
+        <div class="stats-band" style="margin-bottom:1rem">
+          <div class="stat">
+            <div class="stat-value" style="font-size:1.1rem"><span class="status-dot" id="homeSystemDot"></span><span id="homeSystemStatus">Memeriksa&hellip;</span></div>
+            <div class="stat-label">Status layanan</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" style="font-size:1.1rem"><span class="status-dot" id="homeAiDot"></span><span id="homeAiStatus">Memeriksa&hellip;</span></div>
+            <div class="stat-label">Pemeriksa foto AI</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="homeTotalReports">&ndash;</div>
+            <div class="stat-label">Total laporan masuk</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="homeMapCount">&ndash;</div>
+            <div class="stat-label">Titik di peta</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:.75rem">
+          <div id="landingMap" class="map-box" style="height:360px"></div>
+          <div style="display:flex;flex-wrap:wrap;gap:.75rem;justify-content:space-between;align-items:center;padding:.85rem .5rem .25rem">
+            <div class="map-legend" style="margin:0">
+              <span class="legend-item"><span class="legend-marker" style="background:#F59E0B"></span>Menunggu</span>
+              <span class="legend-item"><span class="legend-marker" style="background:#2563EB"></span>Diverifikasi</span>
+              <span class="legend-item"><span class="legend-marker" style="background:#16A34A"></span>Selesai</span>
+              <span class="legend-item"><span class="legend-marker" style="background:#64748B"></span>Ditolak</span>
+            </div>
+            <a href="/peta.html" class="btn btn-dark btn-sm">Buka peta lengkap <i data-icon="arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MENU CEPAT -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="quick-links">
+          <a href="/tracking.html" class="quick-link">
+            <span class="icon-tile blue"><i data-icon="search" class="ic-lg"></i></span>
+            <span><strong>Lacak laporan</strong><span>Cek progres dengan kode AW-&hellip;</span></span>
+            <i data-icon="chevron-right" class="arrow"></i>
+          </a>
+          <a href="/peta.html" class="quick-link">
+            <span class="icon-tile orange"><i data-icon="map" class="ic-lg"></i></span>
+            <span><strong>Peta laporan</strong><span>Lihat sebaran titik laporan</span></span>
+            <i data-icon="chevron-right" class="arrow"></i>
+          </a>
+          <a href="/panduan.html" class="quick-link">
+            <span class="icon-tile green"><i data-icon="help" class="ic-lg"></i></span>
+            <span><strong>Panduan &amp; FAQ</strong><span>Tips aman &amp; arti status</span></span>
+            <i data-icon="chevron-right" class="arrow"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="cta-band">
+          <h2>Satu laporan bisa menyelamatkan banyak orang</h2>
+          <p>Laporan cepat dari warga membantu petugas bergerak lebih awal sebelum api membesar.</p>
+          <a href="/report.html" class="btn btn-lg"><i data-icon="flame"></i> Buat Laporan</a>
+        </div>
+        <div class="disclaimer-box" style="margin-top:1rem">
+          <i data-icon="info"></i>
+          <span>Hasil AI adalah <strong>indikasi awal</strong> berdasarkan foto, bukan konfirmasi resmi. Setiap laporan tetap diperiksa petugas. ApiWaspada adalah prototype dan <strong>tidak menggantikan</strong> layanan darurat resmi.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261112q"></script>
+  <script src="/assets/js/map.js?v=20261112q"></script>
+  <script src="/assets/js/home.js?v=20261112q"></script>
+</body>
+</html>

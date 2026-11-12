@@ -2,84 +2,83 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login Petugas Verifikasi &mdash; ApiWaspada Kota Jambi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="robots" content="noindex" />
+  <title>Masuk Petugas — ApiWaspada Kota Jambi</title>
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
 </head>
-<body>
-  <header class="navbar">
-    <div class="container navbar-inner">
-      <a href="/index.html" class="navbar-brand">
-        <img src="/assets/images/logo.svg" alt="Logo ApiWaspada Kota Jambi" />
-      </a>
-      <div class="nav-actions">
-        <a href="/index.html" class="btn btn-secondary btn-sm">&larr; Kembali ke Halaman Masyarakat</a>
-      </div>
-    </div>
-  </header>
+<body data-area="public" data-page="login">
+  <script src="/assets/js/layout.js?v=20261112q"></script>
 
-  <main class="section" style="display:flex; align-items:center; flex:1;">
-    <div class="container" style="max-width:460px;">
-      <div class="card" style="padding:2rem;">
-        <div style="text-align:center; margin-bottom:1.5rem;">
-          <div class="hero-badge" style="margin-bottom:0.65rem;">Portal Otorisasi Petugas</div>
-          <h1 style="font-size:1.55rem; font-weight:800;">Login Dashboard Petugas</h1>
-          <p style="font-size:0.9rem; color:#64748B; margin-top:0.25rem;">
-            Akses khusus petugas verifikasi untuk memeriksa laporan masyarakat dan memperbarui status penanganan.
-          </p>
-        </div>
+  <main class="auth-wrap">
+    <aside class="auth-side">
+      <span class="hero-badge" style="align-self:flex-start"><span class="pin"><i data-icon="lock"></i></span>Akses khusus petugas</span>
+      <h2>Portal Verifikasi Laporan Kebakaran</h2>
+      <p>Periksa laporan warga, bandingkan dengan hasil AI, dan perbarui status penanganan dalam satu tempat.</p>
+      <ul>
+        <li><i data-icon="grid"></i> Ringkasan &amp; grafik laporan</li>
+        <li><i data-icon="map"></i> Peta sebaran titik kejadian</li>
+        <li><i data-icon="shield"></i> Verifikasi &amp; riwayat status</li>
+      </ul>
+    </aside>
 
-        <div id="loginAlert" class="alert alert-error hidden"></div>
+    <div class="auth-main">
+      <div class="auth-card">
+        <div class="icon-tile dark"><i data-icon="shield" class="ic-lg"></i></div>
+        <h1>Masuk sebagai petugas</h1>
+        <p class="text-muted" style="margin:.35rem 0 1.5rem">Gunakan akun petugas yang telah terdaftar.</p>
 
-        <form id="officerLoginForm">
+        <div id="loginAlert" class="alert alert-error hidden" role="alert"></div>
+
+        <form id="officerLoginForm" novalidate>
           <div class="form-group">
-            <label for="usernameInput" class="form-label">Username Petugas <span class="required">*</span></label>
-            <input
-              type="text"
-              id="usernameInput"
-              class="form-control"
-              required
-              autocomplete="username"
-              placeholder="Masukkan username petugas"
-            />
+            <label for="usernameInput" class="form-label">Username</label>
+            <div class="input-icon">
+              <i data-icon="user"></i>
+              <input type="text" id="usernameInput" class="form-control" required autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Username petugas" />
+            </div>
           </div>
 
           <div class="form-group">
-            <label for="passwordInput" class="form-label">Password <span class="required">*</span></label>
-            <input
-              type="password"
-              id="passwordInput"
-              class="form-control"
-              required
-              autocomplete="current-password"
-              placeholder="Masukkan password"
-            />
+            <label for="passwordInput" class="form-label">Password</label>
+            <div class="input-icon password-wrap">
+              <i data-icon="lock"></i>
+              <input type="password" id="passwordInput" class="form-control" required autocomplete="current-password" placeholder="Password" />
+              <button type="button" class="password-toggle" id="btnTogglePassword" aria-label="Tampilkan password"><i data-icon="eye"></i></button>
+            </div>
           </div>
 
-          <button type="submit" id="btnLoginSubmit" class="btn btn-primary btn-lg" style="width:100%; margin-top:0.5rem;">
-            Masuk ke Dashboard Petugas
-          </button>
+          <button type="submit" id="btnLoginSubmit" class="btn btn-dark btn-lg btn-block" style="margin-top:.5rem">Masuk <i data-icon="arrow-right"></i></button>
         </form>
 
-        <div style="margin-top:1.5rem; padding:0.9rem; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; font-size:0.82rem; color:#475569;">
-          <strong>Catatan Lingkungan Pengembangan (Prototype Lokal):</strong><br />
-          Akun petugas diatur melalui file <code>.env</code> dan diinisialisasi oleh
-          <code>scripts/init_admin.py</code> (Default pengembangan: username
-          <code>petugas_jambi</code>).
-        </div>
+        <details class="dev-note">
+          <summary>Catatan pengembangan (prototype lokal)</summary>
+          <div>Akun petugas diatur melalui file <code>.env</code> dan diinisialisasi oleh <code>scripts/init_admin.py</code> (username bawaan: <code>petugas_jambi</code>).</div>
+        </details>
       </div>
     </div>
   </main>
 
-  <footer class="footer">
-    <div class="container" style="text-align:center;">
-      &copy; 2026 Prototype ApiWaspada Kota Jambi &bull; Portal Verifikasi Petugas
-    </div>
-  </footer>
-
-  <script src="/assets/js/config.js"></script>
-  <script src="/assets/js/utils.js"></script>
-  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261112q"></script>
+  <script src="/assets/js/auth.js?v=20261112q"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var btn = document.getElementById("btnTogglePassword");
+      var input = document.getElementById("passwordInput");
+      if (!btn || !input) return;
+      btn.addEventListener("click", function () {
+        var show = input.type === "password";
+        input.type = show ? "text" : "password";
+        btn.setAttribute("aria-label", show ? "Sembunyikan password" : "Tampilkan password");
+        btn.innerHTML = window.AWLayout.icon(show ? "eye-off" : "eye");
+      });
+    });
+  </script>
 </body>
 </html>

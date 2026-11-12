@@ -2,190 +2,127 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Detail &amp; Verifikasi Laporan &mdash; ApiWaspada Kota Jambi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="robots" content="noindex" />
+  <title>Verifikasi Laporan — Dashboard Petugas ApiWaspada</title>
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
 </head>
-<body>
-  <header class="navbar">
-    <div class="container navbar-inner">
-      <a href="/dashboard.html" class="navbar-brand">
-        <img src="/assets/images/logo.svg" alt="Logo ApiWaspada Kota Jambi" />
-      </a>
-      <div class="nav-actions">
-        <span id="detailOfficerBadge" style="font-size:0.84rem; font-weight:700; color:#334155;"></span>
-        <a href="/dashboard.html" class="btn btn-secondary btn-sm">&larr; Kembali ke Dashboard</a>
-      </div>
-    </div>
-  </header>
+<body data-area="officer" data-page="dash-detail">
+  <script src="/assets/js/layout.js?v=20261112q"></script>
 
-  <main class="section" style="padding-top:1.75rem;">
+  <main>
     <div class="container">
-      <div id="detailAlert" class="alert alert-info hidden"></div>
+      <nav class="breadcrumb" aria-label="Breadcrumb" style="padding-top:1.25rem">
+        <a href="/dashboard.html">Dashboard</a><i data-icon="chevron-right"></i>
+        <a href="/dashboard-laporan.html">Kelola Laporan</a><i data-icon="chevron-right"></i>
+        <span>Detail</span>
+      </nav>
 
-      <!-- Header Detail Laporan -->
-      <div class="card" style="margin-bottom:1.5rem;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+      <div id="detailAlert" class="alert alert-info hidden" role="alert"></div>
+
+      <!-- KEPALA -->
+      <section class="card" style="margin-bottom:1rem">
+        <div class="card-head" style="margin-bottom:0">
           <div>
-            <div class="section-eyebrow">Pemeriksaan &amp; Verifikasi Petugas</div>
-            <h1 id="detReportTitle" style="font-size:1.65rem; font-weight:800;">Detail Laporan</h1>
-            <div style="font-size:0.9rem; color:#64748B;">
-              Kode Pelacakan: <strong id="detTrackingCode" style="color:#DC2626;">-</strong>
+            <span class="eyebrow">Pemeriksaan &amp; verifikasi</span>
+            <h1 id="detReportTitle" style="font-size:clamp(1.4rem,4.5vw,1.9rem);font-weight:800">Detail Laporan</h1>
+            <div class="text-muted" style="font-size:.9rem;margin-top:.2rem">
+              Kode: <strong id="detTrackingCode" class="mono" style="color:var(--red-600)">-</strong>
+              <button type="button" class="btn btn-secondary btn-sm" data-copy-from="detTrackingCode" style="min-height:30px;padding:.2rem .5rem;margin-left:.25rem" aria-label="Salin kode"><i data-icon="copy"></i></button>
             </div>
           </div>
           <div id="detStatusBadge"></div>
         </div>
-
-        <div class="grid-4" style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid #E2E8F0;">
-          <div>
-            <div style="font-size:0.76rem; color:#64748B; font-weight:700;">NAMA PELAPOR</div>
-            <div id="detReporterName" style="font-weight:700;">-</div>
-          </div>
-          <div>
-            <div style="font-size:0.76rem; color:#64748B; font-weight:700;">WAKTU LAPORAN MASUK</div>
-            <div id="detCreatedAt" style="font-weight:700;">-</div>
-          </div>
-          <div>
-            <div style="font-size:0.76rem; color:#64748B; font-weight:700;">PEMBARUAN TERAKHIR</div>
-            <div id="detUpdatedAt" style="font-weight:700;">-</div>
-          </div>
-          <div>
-            <div style="font-size:0.76rem; color:#64748B; font-weight:700;">KOORDINAT LOKASI</div>
-            <code id="detCoordinates" style="font-weight:700; color:#0F172A;">-</code>
-            <div id="detRegionNote" style="font-size:0.75rem; color:#64748B;"></div>
-          </div>
+        <div class="detail-head-grid">
+          <div><div class="detail-label"><i data-icon="user"></i> Pelapor</div><div id="detReporterName" class="detail-value">-</div></div>
+          <div><div class="detail-label"><i data-icon="clock"></i> Masuk</div><div id="detCreatedAt" class="detail-value">-</div></div>
+          <div><div class="detail-label"><i data-icon="refresh"></i> Diperbarui</div><div id="detUpdatedAt" class="detail-value">-</div></div>
+          <div><div class="detail-label"><i data-icon="pin"></i> Koordinat</div><code id="detCoordinates" class="detail-value" style="display:inline-block">-</code><div id="detRegionNote" class="form-hint" style="margin-top:.2rem"></div></div>
         </div>
-      </div>
+      </section>
 
-      <!-- Perbandingan Bukti Visual Asli vs Deteksi AI YOLO -->
-      <div class="card" style="margin-bottom:1.5rem;">
-        <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:1rem;">
-          Pemeriksaan Bukti Visual &amp; Hasil Prediksi AI YOLO
-        </h2>
-
-        <div class="grid-4" style="margin-bottom:1.25rem;">
-          <div style="background:#F8FAFC; padding:0.85rem; border-radius:8px; border:1px solid #E2E8F0;">
-            <div style="font-size:0.75rem; color:#64748B; font-weight:700;">STATUS INDIKASI AI</div>
-            <div id="detAiBadge" style="margin-top:0.25rem;">-</div>
-          </div>
-          <div style="background:#F8FAFC; padding:0.85rem; border-radius:8px; border:1px solid #E2E8F0;">
-            <div style="font-size:0.75rem; color:#64748B; font-weight:700;">CONFIDENCE TERTINGGI</div>
-            <div id="detAiConfidence" style="font-size:1.25rem; font-weight:800; color:#DC2626;">0.0%</div>
-          </div>
-          <div style="background:#F8FAFC; padding:0.85rem; border-radius:8px; border:1px solid #E2E8F0;">
-            <div style="font-size:0.75rem; color:#64748B; font-weight:700;">WAKTU INFERENSI</div>
-            <div id="detAiTime" style="font-size:1.15rem; font-weight:800;">0.0 ms</div>
-          </div>
-          <div style="background:#F8FAFC; padding:0.85rem; border-radius:8px; border:1px solid #E2E8F0;">
-            <div style="font-size:0.75rem; color:#64748B; font-weight:700;">ENGINE / MODEL</div>
-            <div id="detAiModel" style="font-size:0.85rem; font-weight:700; color:#334155;">-</div>
-          </div>
-        </div>
-
-        <div class="grid-2" style="margin-bottom:1.25rem;">
-          <div>
-            <h4 style="font-size:0.9rem; margin-bottom:0.45rem;">Gambar Asli Pelapor</h4>
-            <div class="preview-container">
-              <img id="detOrigImage" src="" alt="Gambar Asli Pelapor" />
+      <div class="report-layout">
+        <!-- KIRI: bukti -->
+        <div class="grid">
+          <section class="card">
+            <h2 class="card-title" style="margin-bottom:1rem"><i data-icon="sparkles"></i> Bukti foto &amp; hasil AI</h2>
+            <div class="info-tiles">
+              <div class="info-tile"><div class="detail-label">Indikasi AI</div><div id="detAiBadge" class="detail-value">-</div></div>
+              <div class="info-tile"><div class="detail-label">Keyakinan</div><div id="detAiConfidence" class="detail-value" style="font-size:1.25rem;color:var(--red-600)">0.0%</div></div>
+              <div class="info-tile"><div class="detail-label">Waktu proses</div><div id="detAiTime" class="detail-value">0.0 ms</div></div>
+              <div class="info-tile"><div class="detail-label">Model</div><div id="detAiModel" class="detail-value" style="font-size:.82rem">-</div></div>
             </div>
-          </div>
-          <div>
-            <h4 style="font-size:0.9rem; margin-bottom:0.45rem;">Gambar Hasil Deteksi AI (Bounding Box)</h4>
-            <div class="preview-container">
-              <img id="detResultImage" src="" alt="Gambar Hasil Deteksi YOLO" />
+            <div class="grid-2" style="margin-bottom:1.1rem">
+              <div><div class="img-label">Foto asli pelapor</div><div class="preview-container"><img id="detOrigImage" src="" alt="Foto asli pelapor" /></div></div>
+              <div><div class="img-label">Penandaan AI</div><div class="preview-container"><img id="detResultImage" src="" alt="Foto dengan kotak penanda AI" /></div></div>
             </div>
-          </div>
-        </div>
-
-        <h4 style="font-size:0.95rem; margin-bottom:0.5rem;">Daftar Bounding Box Objek Terdeteksi</h4>
-        <div class="table-responsive" style="margin-bottom:1rem;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Kelas</th>
-                <th>Confidence</th>
-                <th>Bounding Box [x1, y1, x2, y2]</th>
-              </tr>
-            </thead>
-            <tbody id="detBboxTableBody"></tbody>
-          </table>
-        </div>
-
-        <div class="disclaimer-box">
-          "Hasil deteksi AI merupakan indikasi awal berdasarkan gambar yang diunggah dan bukan konfirmasi resmi kejadian kebakaran. Setiap laporan tetap memerlukan verifikasi petugas."
-        </div>
-      </div>
-
-      <!-- Deskripsi, Peta Lokasi, & Form Tindakan Verifikasi Petugas -->
-      <div class="grid-2" style="align-items:start;">
-        <!-- Kiri: Deskripsi & Peta -->
-        <div class="card">
-          <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:0.75rem;">
-            Deskripsi Laporan &amp; Titik Lokasi Peta
-          </h3>
-          <div style="background:#F8FAFC; padding:1rem; border-radius:8px; border:1px solid #E2E8F0; margin-bottom:1.25rem;">
-            <p id="detDescription" style="white-space:pre-line; color:#0F172A;"></p>
-          </div>
-          <div id="detailLocationMap" class="map-box" style="height:320px;"></div>
-        </div>
-
-        <!-- Kanan: Form Update Status & Riwayat -->
-        <div class="card">
-          <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:0.75rem;">
-            Keputusan Verifikasi Petugas
-          </h3>
-          <form id="statusUpdateForm" style="margin-bottom:1.75rem; padding-bottom:1.25rem; border-bottom:1px solid #E2E8F0;">
-            <div class="form-group">
-              <label for="newStatusSelect" class="form-label">Pilih Status Laporan <span class="required">*</span></label>
-              <select id="newStatusSelect" class="form-control" required>
-                <option value="pending">Pending (Menunggu Verifikasi)</option>
-                <option value="verified">Verified (Terverifikasi &mdash; Tindak Lanjuti)</option>
-                <option value="rejected">Rejected (Ditolak / Laporan Tidak Valid)</option>
-                <option value="completed">Completed (Penanganan Selesai)</option>
-              </select>
+            <h3 class="bbox-heading">Objek terdeteksi</h3>
+            <div class="table-responsive table-cards" style="margin-bottom:1rem">
+              <table class="data-table">
+                <thead><tr><th>No</th><th>Kelas</th><th>Keyakinan</th><th>Kotak [x1, y1, x2, y2]</th></tr></thead>
+                <tbody id="detBboxTableBody"></tbody>
+              </table>
             </div>
+            <div class="disclaimer-box"><i data-icon="info"></i><span>Hasil AI adalah indikasi awal, bukan konfirmasi resmi. Keputusan akhir berada pada petugas.</span></div>
+          </section>
 
-            <div class="form-group">
-              <label for="verificationNote" class="form-label">Catatan Verifikasi Petugas <span class="required">*</span></label>
-              <textarea
-                id="verificationNote"
-                class="form-control"
-                rows="3"
-                minlength="3"
-                maxlength="1000"
-                required
-                placeholder="Tuliskan hasil pemeriksaan visual/lapangan atau alasan perubahan status..."
-              ></textarea>
-            </div>
+          <section class="card">
+            <h2 class="card-title" style="margin-bottom:.85rem"><i data-icon="file"></i> Keterangan &amp; lokasi</h2>
+            <div class="desc-box"><p id="detDescription" style="margin:0"></p></div>
+            <div id="detailLocationMap" class="map-box" style="height:300px"></div>
+          </section>
+        </div>
 
-            <button type="submit" id="btnSaveStatus" class="btn btn-primary" style="width:100%;">
-              Simpan Perubahan Status &amp; Catat Riwayat
-            </button>
-          </form>
+        <!-- KANAN: keputusan -->
+        <div class="col-right grid">
+          <section class="card">
+            <h2 class="card-title" style="margin-bottom:1rem"><i data-icon="shield"></i> Keputusan verifikasi</h2>
+            <form id="statusUpdateForm" novalidate>
+              <div class="form-group" style="margin-bottom:.6rem">
+                <span class="form-label">Status baru <span class="required">*</span></span>
+                <div class="status-options" id="statusOptions" role="group" aria-label="Pilih status">
+                  <button type="button" class="status-option" data-value="pending"><span class="legend-marker" style="background:#F59E0B"></span>Menunggu</button>
+                  <button type="button" class="status-option" data-value="verified"><span class="legend-marker" style="background:#2563EB"></span>Verifikasi</button>
+                  <button type="button" class="status-option" data-value="completed"><span class="legend-marker" style="background:#16A34A"></span>Selesai</button>
+                  <button type="button" class="status-option" data-value="rejected"><span class="legend-marker" style="background:#64748B"></span>Tolak</button>
+                </div>
+                <label for="newStatusSelect" class="sr-only">Status laporan</label>
+                <select id="newStatusSelect" class="form-control sr-only" required tabindex="-1">
+                  <option value="pending">Menunggu verifikasi</option>
+                  <option value="verified">Terverifikasi &mdash; tindak lanjuti</option>
+                  <option value="rejected">Ditolak / tidak valid</option>
+                  <option value="completed">Selesai ditangani</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="verificationNote" class="form-label">Catatan petugas <span class="required">*</span></label>
+                <textarea id="verificationNote" class="form-control" rows="4" minlength="3" maxlength="1000" required placeholder="Tuliskan hasil pemeriksaan foto/lapangan atau alasan perubahan status&hellip;"></textarea>
+                <div class="form-hint">Catatan ini akan terlihat oleh pelapor di halaman Lacak Laporan.</div>
+              </div>
+              <button type="submit" id="btnSaveStatus" class="btn btn-primary btn-lg btn-block"><i data-icon="check"></i> Simpan keputusan</button>
+            </form>
+          </section>
 
-          <h3 style="font-size:1.05rem; font-weight:800; margin-bottom:0.85rem;">
-            Log Riwayat Perubahan Status
-          </h3>
-          <div id="detHistoryTimeline" class="timeline"></div>
+          <section class="card">
+            <h2 class="card-title" style="margin-bottom:1rem"><i data-icon="list"></i> Riwayat status</h2>
+            <div id="detHistoryTimeline" class="timeline"></div>
+          </section>
         </div>
       </div>
     </div>
   </main>
 
-  <footer class="footer">
-    <div class="container" style="text-align:center;">
-      &copy; 2026 Prototype ApiWaspada Kota Jambi &bull; Pemeriksaan Detail Laporan
-    </div>
-  </footer>
-
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/assets/js/config.js"></script>
-  <script src="/assets/js/utils.js"></script>
-  <script src="/assets/js/map.js"></script>
-  <script src="/assets/js/auth.js"></script>
-  <script src="/assets/js/report-detail.js"></script>
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261112q"></script>
+  <script src="/assets/js/map.js?v=20261112q"></script>
+  <script src="/assets/js/auth.js?v=20261112q"></script>
+  <script src="/assets/js/report-detail.js?v=20261112q"></script>
 </body>
 </html>
