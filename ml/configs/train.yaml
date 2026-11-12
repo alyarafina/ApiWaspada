@@ -1,0 +1,10 @@
+model: yolov8n.pt
+imgsz: 640
+batch: 8
+epochs: 50
+patience: 12
+workers: 2
+seed: 42
+device: auto
+project: runs/train
+name: apiwaspada_dfire

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lacak Status Laporan &amp; Peta &mdash; ApiWaspada Kota Jambi</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="/index.html" class="navbar-brand">
+        <img src="/assets/images/logo.svg" alt="Logo ApiWaspada Kota Jambi" />
+      </a>
+      <ul class="nav-links">
+        <li><a href="/index.html" class="nav-link">Beranda</a></li>
+        <li><a href="/report.html" class="nav-link">Buat Laporan</a></li>
+        <li><a href="/tracking.html" class="nav-link active">Lacak Laporan &amp; Peta</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="/report.html" class="btn btn-primary btn-sm">+ Buat Laporan</a>
+        <a href="/login.html" class="btn btn-secondary btn-sm">Portal Petugas</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="section" style="padding-top:2rem;">
+    <div class="container">
+      <!-- Pencarian Status Laporan -->
+      <div class="card" style="margin-bottom:2rem;">
+        <div class="section-eyebrow">Pelacakan Status Laporan Masyarakat</div>
+        <h1 style="font-size:1.65rem; font-weight:800; margin-bottom:0.4rem;">
+          Cek Progres Verifikasi Laporan Anda
+        </h1>
+        <p style="color:#64748B; font-size:0.93rem; margin-bottom:1.15rem;">
+          Masukkan <strong>Kode Pelacakan</strong> (contoh: <code>AW-20261111-XXXXXX</code>) atau
+          <strong>ID Laporan</strong> untuk melihat status verifikasi petugas dan riwayat penanganan.
+        </p>
+
+        <form id="trackingSearchForm" style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+          <input
+            type="text"
+            id="trackingInput"
+            class="form-control"
+            style="flex:1; min-width:240px;"
+            placeholder="Masukkan Kode Pelacakan (AW-...) atau ID Laporan (contoh: 1)"
+            required
+          />
+          <button type="submit" class="btn btn-primary">Cari Laporan</button>
+        </form>
+
+        <div id="trackingAlert" class="alert alert-error hidden" style="margin-top:1rem; margin-bottom:0;"></div>
+      </div>
+
+      <!-- Hasil Pencarian Detail Laporan -->
+      <div id="trackingResultBox" class="card hidden" style="margin-bottom:2.25rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-bottom:1px solid #E2E8F0; padding-bottom:0.85rem; margin-bottom:1.25rem;">
+          <div>
+            <span style="font-size:0.82rem; color:#64748B; font-weight:700;">HASIL PELACAKAN LAPORAN</span>
+            <h2 style="font-size:1.35rem; font-weight:800;">
+              Laporan <span id="trkId"></span> &bull; <span id="trkCode" style="color:#DC2626;"></span>
+            </h2>
+          </div>
+          <div id="trkStatusBadge"></div>
+        </div>
+
+        <div class="grid-4" style="margin-bottom:1.25rem;">
+          <div style="background:#F8FAFC; padding:0.8rem; border-radius:8px; border:1px solid #E2E8F0;">
+            <div style="font-size:0.75rem; color:#64748B; font-weight:700;">WAKTU DILAPORKAN</div>
+            <div id="trkCreatedAt" style="font-weight:700; font-size:0.9rem;">-</div>
+          </div>
+          <div style="background:#F8FAFC; padding:0.8rem; border-radius:8px; border:1px solid #E2E8F0;">
+            <div style="font-size:0.75rem; color:#64748B; font-weight:700;">PEMBARUAN TERAKHIR</div>
+            <div id="trkUpdatedAt" style="font-weight:700; font-size:0.9rem;">-</div>
+          </div>
+          <div style="background:#F8FAFC; padding:0.8rem; border-radius:8px; border:1px solid #E2E8F0;">
+            <div style="font-size:0.75rem; color:#64748B; font-weight:700;">INDIKASI DETEKSI AI</div>
+            <div id="trkDetectionBadge" style="margin-top:0.2rem;">-</div>
+          </div>
+          <div style="background:#F8FAFC; padding:0.8rem; border-radius:8px; border:1px solid #E2E8F0;">
+            <div style="font-size:0.75rem; color:#64748B; font-weight:700;">CONFIDENCE &amp; KOORDINAT</div>
+            <div style="font-weight:700; font-size:0.88rem;">
+              <span id="trkConfidence">-</span> &bull; <code id="trkCoords">-</code>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:1.25rem; background:#F8FAFC; padding:1rem; border-radius:8px; border:1px solid #E2E8F0;">
+          <div style="font-size:0.8rem; font-weight:700; color:#475569; margin-bottom:0.3rem;">DESKRIPSI KEJADIAN:</div>
+          <p id="trkDescription" style="margin:0; color:#0F172A;"></p>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:1.5rem;">
+          <div>
+            <h4 style="font-size:0.9rem; margin-bottom:0.45rem;">Foto Asli Laporan</h4>
+            <div class="preview-container">
+              <img id="trkOrigImg" src="" alt="Foto Asli" />
+            </div>
+          </div>
+          <div>
+            <h4 style="font-size:0.9rem; margin-bottom:0.45rem;">Visualisasi Deteksi AI YOLO</h4>
+            <div class="preview-container">
+              <img id="trkResultImg" src="" alt="Visualisasi Deteksi YOLO" />
+            </div>
+          </div>
+        </div>
+
+        <h4 style="font-size:0.96rem; margin-bottom:0.75rem;">Riwayat Verifikasi &amp; Perubahan Status</h4>
+        <div id="trkHistoryList" class="timeline" style="margin-bottom:1.25rem;"></div>
+
+        <div class="disclaimer-box">
+          "Hasil deteksi AI merupakan indikasi awal berdasarkan gambar yang diunggah dan bukan konfirmasi resmi kejadian kebakaran. Setiap laporan tetap memerlukan verifikasi petugas."
+        </div>
+      </div>
+
+      <!-- Peta Persebaran Laporan Masyarakat -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+          <div>
+            <h2 style="font-size:1.3rem; font-weight:800;">Peta Persebaran Laporan Kota Jambi</h2>
+            <p style="font-size:0.88rem; color:#64748B;">
+              Klik marker pada peta atau tombol pada tabel untuk melihat detail status laporan.
+            </p>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <label for="publicMapFilter" style="font-size:0.85rem; font-weight:600;">Filter Status:</label>
+            <select id="publicMapFilter" class="form-control" style="width:auto; padding:0.45rem 0.75rem;">
+              <option value="">Semua Status</option>
+              <option value="pending">Pending (Menunggu Verifikasi)</option>
+              <option value="verified">Verified (Terverifikasi)</option>
+              <option value="rejected">Rejected (Ditolak)</option>
+              <option value="completed">Completed (Selesai)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="publicDistributionMap" class="map-box" style="height:380px;"></div>
+        <div class="map-legend" style="margin-bottom:1.5rem;">
+          <span class="legend-item"><span class="legend-marker" style="background:#F59E0B;"></span>Pending</span>
+          <span class="legend-item"><span class="legend-marker" style="background:#2563EB;"></span>Verified</span>
+          <span class="legend-item"><span class="legend-marker" style="background:#64748B;"></span>Rejected</span>
+          <span class="legend-item"><span class="legend-marker" style="background:#16A34A;"></span>Completed</span>
+        </div>
+
+        <h3 style="font-size:1.05rem; margin-bottom:0.75rem;">Daftar Laporan Terbaru</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID / Kode</th>
+                <th>Waktu</th>
+                <th>Koordinat</th>
+                <th>Hasil Deteksi AI</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="publicReportsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container" style="text-align:center;">
+      &copy; 2026 Prototype ApiWaspada Kota Jambi &bull; Pelacakan &amp; Pemetaan Geospasial
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/map.js"></script>
+  <script src="/assets/js/tracking.js"></script>
+</body>
+</html>

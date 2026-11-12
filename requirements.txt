@@ -1,0 +1,46 @@
+# ==============================================================================
+# APIWASPADA - DAFTAR DEPENDENSI LENGKAP (BACKEND + AI/ML + TESTING)
+# Kompatibel dengan Python 3.10 di Windows 10/11 (CPU maupun GPU NVIDIA CUDA)
+#
+# Catatan Penting untuk PyTorch (GPU NVIDIA):
+# Jika komputer Anda memiliki GPU NVIDIA (CUDA), instal PyTorch versi CUDA
+# terlebih dahulu sebelum menjalankan `pip install -r requirements.txt`:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+# Jika hanya menggunakan CPU, `pip install -r requirements.txt` akan otomatis
+# menginstal PyTorch versi standar yang kompatibel dengan CPU.
+# ==============================================================================
+
+# --- Backend Framework & Server ---
+fastapi>=0.109.0,<1.0.0
+uvicorn[standard]>=0.27.0,<1.0.0
+python-multipart>=0.0.6,<1.0.0
+pydantic>=1.10.4,<3.0.0
+python-dotenv>=1.0.0,<2.0.0
+
+# --- Database ORM ---
+SQLAlchemy>=2.0.25,<3.0.0
+
+# --- Keamanan & Autentikasi ---
+cryptography>=41.0.0
+
+# --- AI, Computer Vision & Data Science ---
+torch>=2.1.0,<2.6.0
+torchvision>=0.16.0,<0.21.0
+ultralytics>=8.1.0,<9.0.0
+opencv-python>=4.8.0,<5.0.0
+numpy>=1.24.0,<2.2.0
+Pillow>=10.0.0,<12.0.0
+matplotlib>=3.7.0,<4.0.0
+PyYAML>=6.0.1,<7.0.0
+pandas>=2.0.0,<3.0.0
+seaborn>=0.13.0,<1.0.0
+
+# --- Jupyter Notebook Environment ---
+jupyter>=1.0.0
+ipykernel>=6.25.0
+notebook>=7.0.0
+
+# --- Pengujian Otomatis (QA) ---
+pytest>=7.4.0,<9.0.0
+httpx>=0.23.0,<1.0.0
+requests>=2.31.0,<3.0.0

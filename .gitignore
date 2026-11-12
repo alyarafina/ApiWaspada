@@ -1,0 +1,45 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment variables
+.env
+
+# Database & Local Storage (pertahankan struktur folder dengan .gitkeep)
+storage/uploads/*
+!storage/uploads/.gitkeep
+storage/results/*
+!storage/results/.gitkeep
+storage/database/*.db
+storage/database/*.db-journal
+!storage/database/.gitkeep
+
+# Machine Learning Datasets & Outputs
+ml/dataset/
+ml/datasets/
+ml/DFireDataset/
+ml/runs/
+ml/outputs/
+ml/weights/*.pt
+!ml/weights/README.md
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE & OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

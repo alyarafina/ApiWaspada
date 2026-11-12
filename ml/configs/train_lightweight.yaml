@@ -1,0 +1,19 @@
+# ==============================================================================
+# KONFIGURASI TRAINING RINGAN (LIGHTWEIGHT / SMOKE TEST)
+# Cocok untuk pengujian cepat pada CPU atau laptop dengan VRAM terbatas.
+# ==============================================================================
+base_model: "yolov8n.pt"
+data_yaml: "ml/data.yaml"
+imgsz: 416
+batch: 8
+epochs: 10
+lr0: 0.01
+lrf: 0.01
+optimizer: "auto"
+patience: 5
+device: "auto"
+workers: 2
+seed: 42
+project_dir: "ml/runs/detect"
+experiment_name: "apiwaspada_dfire_light"
+export_best_to: "ml/weights/best.pt"

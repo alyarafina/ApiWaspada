@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ApiWaspada &mdash; Deteksi Visual Api &amp; Asap serta Pelaporan Lokasi Kota Jambi</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="/index.html" class="navbar-brand">
+        <img src="/assets/images/logo.svg" alt="Logo ApiWaspada Kota Jambi" />
+      </a>
+      <ul class="nav-links">
+        <li><a href="/index.html" class="nav-link active">Beranda</a></li>
+        <li><a href="/report.html" class="nav-link">Buat Laporan</a></li>
+        <li><a href="/tracking.html" class="nav-link">Lacak Laporan &amp; Peta</a></li>
+        <li><a href="#cara-kerja" class="nav-link">Cara Kerja</a></li>
+        <li><a href="#fitur-utama" class="nav-link">Fitur Sistem</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="/report.html" class="btn btn-primary btn-sm">+ Lapor Kebakaran</a>
+        <a href="/login.html" class="btn btn-secondary btn-sm">Portal Petugas</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="hero-badge">Prototype Sistem Cerdas &bull; Kota Jambi</div>
+        <h1 class="hero-title">
+          Deteksi Visual <span>Api &amp; Asap</span> Berbasis YOLO serta Pelaporan Geospasial
+        </h1>
+        <p class="hero-desc">
+          <strong>ApiWaspada</strong> mengintegrasikan model Computer Vision <em>Ultralytics YOLO</em>
+          (dilatih pada D-Fire Dataset), pengambilan koordinat GPS masyarakat, pemetaan interaktif
+          OpenStreetMap, dan dashboard verifikasi petugas untuk mendukung respons awal penanganan
+          dugaan kebakaran di wilayah Kota Jambi.
+        </p>
+        <div class="hero-cta-group">
+          <a href="/report.html" class="btn btn-primary btn-lg">Buat Laporan Dugaan Kebakaran</a>
+          <a href="/tracking.html" class="btn btn-secondary btn-lg">Cek Status &amp; Peta Laporan</a>
+        </div>
+        <div class="disclaimer-box">
+          <strong>Disclaimer Penggunaan AI &amp; Layanan Darurat:</strong><br />
+          Hasil deteksi AI merupakan indikasi awal berdasarkan gambar yang diunggah dan bukan konfirmasi resmi kejadian kebakaran. Setiap laporan tetap memerlukan verifikasi petugas. Sistem ini adalah <em>prototype</em> pendukung dan tidak menggantikan panggilan darurat resmi pemerintah.
+        </div>
+      </div>
+
+      <!-- Kartu Ringkasan Status Sistem Real-Time -->
+      <div class="card" style="padding:1.75rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <h3 style="font-size:1.1rem; font-weight:800;">Status Operasional Sistem</h3>
+          <span id="landingSystemBadge" class="badge badge-completed">
+            <span class="badge-dot"></span>Memeriksa...
+          </span>
+        </div>
+        <p style="font-size:0.9rem; color:#64748B; margin-bottom:1.25rem;">
+          Ringkasan konektivitas layanan backend FastAPI, database SQLite, dan mesin inferensi YOLO:
+        </p>
+        <div style="display:grid; gap:0.85rem; margin-bottom:1.25rem;">
+          <div style="padding:0.85rem 1rem; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:600; font-size:0.9rem;">Modul Computer Vision YOLO</span>
+            <span id="landingAiStatusText" style="font-size:0.85rem; font-weight:700; color:#B45309;">Memuat...</span>
+          </div>
+          <div style="padding:0.85rem 1rem; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:600; font-size:0.9rem;">Total Laporan Tersimpan</span>
+            <span id="landingTotalReports" style="font-size:1.05rem; font-weight:800; color:#DC2626;">0</span>
+          </div>
+          <div style="padding:0.85rem 1rem; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:600; font-size:0.9rem;">Titik Referensi GIS</span>
+            <span style="font-size:0.85rem; font-weight:700; color:#334155;">Kota Jambi (-1.6101, 103.6131)</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:0.75rem;">
+          <a href="/report.html" class="btn btn-outline-orange" style="flex:1;">Uji Deteksi Gambar</a>
+          <a href="/login.html" class="btn btn-secondary" style="flex:1;">Dashboard Petugas</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Informasi Singkat Tentang ApiWaspada -->
+  <section class="section" id="tentang">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-eyebrow">Tentang ApiWaspada</div>
+        <h2 class="section-title">Pendukung Verifikasi Visual &amp; Spasial Kebakaran</h2>
+        <p class="section-subtitle">
+          Dirancang untuk membantu menyaring laporan masyarakat melalui analisis citra otomatis
+          sebelum ditindaklanjuti oleh petugas verifikasi di lapangan.
+        </p>
+      </div>
+      <div class="grid-3">
+        <div class="card card-hover">
+          <h3 style="margin-bottom:0.5rem; color:#DC2626;">1. Deteksi Visual Api &amp; Asap</h3>
+          <p style="font-size:0.93rem; color:#334155;">
+            Menggunakan arsitektur <strong>Ultralytics YOLO</strong> dengan transfer learning pada
+            <em>D-Fire Dataset</em> untuk mengenali objek <code>Fire</code> (Api) dan <code>Smoke</code> (Asap)
+            lengkap dengan <em>bounding box</em> serta <em>confidence score</em>.
+          </p>
+        </div>
+        <div class="card card-hover">
+          <h3 style="margin-bottom:0.5rem; color:#EA580C;">2. Pelaporan Berbasis Lokasi (GIS)</h3>
+          <p style="font-size:0.93rem; color:#334155;">
+            Mengintegrasikan <strong>Browser Geolocation API</strong> dan peta interaktif
+            <strong>Leaflet.js + OpenStreetMap</strong> untuk merekam koordinat latitude dan longitude
+            lokasi dugaan kebakaran secara akurat di Kota Jambi.
+          </p>
+        </div>
+        <div class="card card-hover">
+          <h3 style="margin-bottom:0.5rem; color:#1D4ED8;">3. Verifikasi &amp; Audit Petugas</h3>
+          <p style="font-size:0.93rem; color:#334155;">
+            Setiap laporan yang masuk berstatus awal <code>pending</code> dan diperiksa oleh petugas
+            melalui dashboard terproteksi untuk diperbarui menjadi <code>verified</code>,
+            <code>rejected</code>, atau <code>completed</code>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cara Kerja Sistem -->
+  <section class="section" id="cara-kerja" style="background:#FFFFFF; border-top:1px solid #E2E8F0; border-bottom:1px solid #E2E8F0;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-eyebrow">Alur Proses Terintegrasi</div>
+        <h2 class="section-title">Bagaimana ApiWaspada Bekerja?</h2>
+        <p class="section-subtitle">
+          Empat tahapan terstruktur mulai dari pengunggahan bukti visual oleh masyarakat hingga
+          pemantauan spasial oleh petugas.
+        </p>
+      </div>
+      <div class="grid-4">
+        <div class="card">
+          <div class="step-badge">1</div>
+          <h3 style="font-size:1.05rem; margin-bottom:0.45rem;">Unggah Foto &amp; Lokasi</h3>
+          <p style="font-size:0.88rem; color:#475569;">
+            Masyarakat mengambil foto dari kamera atau mengunggah file gambar (JPG/PNG), mengisi
+            deskripsi kejadian, dan mengambil koordinat GPS.
+          </p>
+        </div>
+        <div class="card">
+          <div class="step-badge">2</div>
+          <h3 style="font-size:1.05rem; margin-bottom:0.45rem;">Analisis AI YOLO</h3>
+          <p style="font-size:0.88rem; color:#475569;">
+            Backend FastAPI memproses citra menggunakan model YOLO untuk mendeteksi keberadaan
+            api dan asap beserta <em>bounding box</em> dan skor keyakinan.
+          </p>
+        </div>
+        <div class="card">
+          <div class="step-badge">3</div>
+          <h3 style="font-size:1.05rem; margin-bottom:0.45rem;">Penyimpanan &amp; Kode Lacak</h3>
+          <p style="font-size:0.88rem; color:#475569;">
+            Data laporan dan citra hasil deteksi disimpan ke database SQLite. Pelapor memperoleh
+            ID dan Kode Pelacakan unik (<code>AW-...</code>).
+          </p>
+        </div>
+        <div class="card">
+          <div class="step-badge">4</div>
+          <h3 style="font-size:1.05rem; margin-bottom:0.45rem;">Verifikasi Dashboard &amp; Peta</h3>
+          <p style="font-size:0.88rem; color:#475569;">
+            Petugas memeriksa bukti visual dan titik lokasi pada peta dashboard, memperbarui
+            status laporan, dan mencatat riwayat penanganan.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fitur Utama & Peta Persebaran Singkat -->
+  <section class="section" id="fitur-utama">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-eyebrow">Peta Pantau &amp; Fitur Utama</div>
+        <h2 class="section-title">Persebaran Laporan Kebakaran Kota Jambi</h2>
+        <p class="section-subtitle">
+          Visualisasi geospasial titik laporan masyarakat secara real-time dari database lokal SQLite.
+        </p>
+      </div>
+
+      <div class="card" style="margin-bottom:2rem;">
+        <div id="landingPreviewMap" class="map-box" style="height:360px;"></div>
+        <div class="map-legend">
+          <span class="legend-item"><span class="legend-marker" style="background:#F59E0B;"></span>Pending (Menunggu Verifikasi)</span>
+          <span class="legend-item"><span class="legend-marker" style="background:#2563EB;"></span>Verified (Terverifikasi)</span>
+          <span class="legend-item"><span class="legend-marker" style="background:#64748B;"></span>Rejected (Ditolak / Tidak Valid)</span>
+          <span class="legend-item"><span class="legend-marker" style="background:#16A34A;"></span>Completed (Selesai)</span>
+        </div>
+      </div>
+
+      <div class="disclaimer-box">
+        <strong>Pernyataan Penting:</strong>
+        "Hasil deteksi AI merupakan indikasi awal berdasarkan gambar yang diunggah dan bukan konfirmasi resmi kejadian kebakaran. Setiap laporan tetap memerlukan verifikasi petugas."
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h4>ApiWaspada &mdash; Kota Jambi</h4>
+          <p style="color:#94A3B8; margin-bottom:0.75rem;">
+            Sistem Cerdas Deteksi Visual Api dan Asap serta Pelaporan Berbasis Lokasi untuk
+            Mendukung Penanganan Kebakaran di Kota Jambi.
+          </p>
+          <p style="color:#64748B; font-size:0.8rem;">
+            Catatan: Aplikasi ini merupakan prototype pendukung pelaporan dan verifikasi, bukan
+            sistem resmi instansi pemerintah dan tidak terhubung otomatis ke layanan darurat 112/Damkar.
+          </p>
+        </div>
+        <div>
+          <h4>Navigasi Masyarakat</h4>
+          <ul style="list-style:none; display:grid; gap:0.4rem;">
+            <li><a href="/index.html">Halaman Utama</a></li>
+            <li><a href="/report.html">Form Pelaporan Kebakaran</a></li>
+            <li><a href="/tracking.html">Pelacakan Status Laporan</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Portal Petugas &amp; Dokumentasi</h4>
+          <ul style="list-style:none; display:grid; gap:0.4rem;">
+            <li><a href="/login.html">Login Petugas Verifikasi</a></li>
+            <li><a href="/dashboard.html">Dashboard Pemantauan</a></li>
+            <li><a href="/docs" target="_blank" rel="noopener">Dokumentasi OpenAPI (/docs)</a></li>
+          </ul>
+        </div>
+      </div>
+      <div style="border-top:1px solid #1E293B; padding-top:1.25rem; text-align:center; color:#64748B; font-size:0.82rem;">
+        &copy; 2026 Prototype ApiWaspada Kota Jambi &bull; Dibangun dengan FastAPI, Ultralytics YOLO, SQLite &amp; Leaflet.js
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/map.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      const { apiFetch } = window.ApiWaspadaUtils;
+      const cfg = window.APIWASPADA_CONFIG;
+
+      const map = L.map("landingPreviewMap").setView([cfg.DEFAULT_LAT, cfg.DEFAULT_LNG], cfg.DEFAULT_ZOOM);
+      window.ApiWaspadaMap.initBaseTileLayers(map);
+      const markersLayer = L.layerGroup().addTo(map);
+
+      try {
+        const health = await apiFetch("/api/health");
+        const badge = document.getElementById("landingSystemBadge");
+        const aiText = document.getElementById("landingAiStatusText");
+        const totalEl = document.getElementById("landingTotalReports");
+
+        badge.innerHTML = `<span class="badge-dot"></span>Sistem Aktif`;
+        totalEl.textContent = health.total_reports;
+        if (health.ai_status && health.ai_status.ai_available) {
+          aiText.textContent = "YOLO Aktif (" + health.ai_status.device + ")";
+          aiText.style.color = "#15803D";
+        } else {
+          aiText.textContent = "Mode AI Belum Aktif (Menunggu best.pt)";
+          aiText.style.color = "#B45309";
+        }
+
+        const mapData = await apiFetch("/api/dashboard/map");
+        window.ApiWaspadaMap.renderReportsDistributionMap(map, markersLayer, mapData.markers, false);
+      } catch (e) {
+        console.error("Gagal memuat ringkasan beranda:", e);
+      }
+    });
+  </script>
+</body>
+</html>

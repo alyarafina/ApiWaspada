@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 56" width="240" height="56" role="img" aria-label="Logo ApiWaspada Kota Jambi">
+  <defs>
+    <linearGradient id="flameGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#B91C1C"/>
+      <stop offset="55%" stop-color="#DC2626"/>
+      <stop offset="100%" stop-color="#F97316"/>
+    </linearGradient>
+    <linearGradient id="innerFlame" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#FACC15"/>
+    </linearGradient>
+  </defs>
+  <!-- Shield + Location Pin Base -->
+  <rect x="4" y="4" width="48" height="48" rx="12" fill="url(#flameGrad)"/>
+  <path d="M28 11C23.5 17.5 17 22 17 30.2C17 36.4 21.9 41.5 28 41.5C34.1 41.5 39 36.4 39 30.2C39 25.3 36.2 21.1 33.4 18.2C33.1 21.3 31.2 23.2 29.5 24.1C30.8 19.8 30.2 14.8 28 11Z" fill="#FFFFFF"/>
+  <path d="M28 23.5C25.5 26.8 23.2 29.2 23.2 32.5C23.2 35.2 25.3 37.5 28 37.5C30.7 37.5 32.8 35.2 32.8 32.5C32.8 29.5 30.5 27.1 28 23.5Z" fill="url(#innerFlame)"/>
+  <!-- Typography -->
+  <text x="62" y="29" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="21" font-weight="800" fill="#0F172A" letter-spacing="-0.4">
+    Api<tspan fill="#DC2626">Waspada</tspan>
+  </text>
+  <text x="63" y="44" font-family="Inter, Segoe UI, system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#64748B" letter-spacing="0.8">
+    DETEKSI VISUAL &amp; GIS KOTA JAMBI
+  </text>
+</svg>
