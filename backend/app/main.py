@@ -83,11 +83,16 @@ app.mount(
 
 ALLOWED_HTML_PAGES = {
     "index.html",
+    "beranda.html",
     "report.html",
     "tracking.html",
     "login.html",
     "dashboard.html",
     "report-detail.html",
+    "peta.html",
+    "panduan.html",
+    "dashboard-peta.html",
+    "dashboard-laporan.html",
 }
 
 
@@ -104,7 +109,7 @@ def root_endpoint(request: Request) -> Any:
     )
     index_file = settings.FRONTEND_DIR / "index.html"
     if not wants_json and index_file.exists():
-        return FileResponse(str(index_file), media_type="text/html")
+        return FileResponse(str(index_file), media_type="text/html", headers={"Cache-Control": "no-cache"})
 
     return JSONResponse(
         content={
@@ -115,6 +120,7 @@ def root_endpoint(request: Request) -> Any:
             "health_url": "/api/health",
             "pages": {
                 "landing": "/index.html",
+                "public_home": "/beranda.html",
                 "report_form": "/report.html",
                 "tracking": "/tracking.html",
                 "officer_login": "/login.html",
@@ -136,7 +142,7 @@ def serve_frontend_page(page_name: str) -> Any:
     if clean_name in ALLOWED_HTML_PAGES:
         target = (settings.FRONTEND_DIR / clean_name).resolve()
         if target.exists() and settings.FRONTEND_DIR in target.parents:
-            return FileResponse(str(target), media_type="text/html")
+            return FileResponse(str(target), media_type="text/html", headers={"Cache-Control": "no-cache"})
     return JSONResponse(
         status_code=404,
         content={"detail": f"Halaman '{clean_name}' tidak ditemukan."},

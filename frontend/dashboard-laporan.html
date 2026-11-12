@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="robots" content="noindex" />
+  <title>Kelola Laporan — Dashboard Petugas ApiWaspada</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+</head>
+<body data-area="officer" data-page="dash-reports">
+  <script src="/assets/js/layout.js?v=20261112q"></script>
+
+  <main>
+    <div class="container">
+      <header class="dash-head">
+        <div>
+          <span class="eyebrow">Dashboard petugas</span>
+          <h1>Kelola laporan</h1>
+          <p>Cari, saring, lalu buka laporan untuk diverifikasi.</p>
+        </div>
+        <div class="dash-actions">
+          <button type="button" id="btnRefreshDashboard" class="btn btn-secondary btn-sm"><i data-icon="refresh"></i> Segarkan</button>
+        </div>
+      </header>
+
+      <section class="card">
+        <form id="filterForm" class="filter-grid" novalidate>
+          <div class="form-group">
+            <label for="filterSearch" class="form-label">Cari</label>
+            <div class="input-icon">
+              <i data-icon="search"></i>
+              <input type="search" id="filterSearch" class="form-control" placeholder="ID, kode AW-, keterangan, pelapor&hellip;" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="filterStatus" class="form-label">Status</label>
+            <select id="filterStatus" class="form-control">
+              <option value="">Semua status</option>
+              <option value="pending">Menunggu verifikasi</option>
+              <option value="verified">Terverifikasi</option>
+              <option value="rejected">Ditolak</option>
+              <option value="completed">Selesai</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="filterDateFrom" class="form-label">Dari tanggal</label>
+            <input type="date" id="filterDateFrom" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="filterDateTo" class="form-label">Sampai tanggal</label>
+            <input type="date" id="filterDateTo" class="form-control" />
+          </div>
+        </form>
+
+        <div class="filter-actions">
+          <button type="button" id="btnApplyFilter" class="btn btn-dark btn-sm"><i data-icon="search"></i> Terapkan</button>
+          <button type="button" id="btnResetFilter" class="btn btn-secondary btn-sm"><i data-icon="x"></i> Reset</button>
+        </div>
+
+        <div class="table-responsive table-cards">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID &amp; Kode</th>
+                <th>Waktu</th>
+                <th>Lokasi &amp; Pelapor</th>
+                <th>Hasil AI</th>
+                <th>Keyakinan</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="dashboardReportsTableBody">
+              <tr><td colspan="7"><div class="skeleton" style="height:48px"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div id="paginationInfo" class="pagination-info">Halaman 1 dari 1</div>
+          <div class="pagination-btns">
+            <button type="button" id="btnPrevPage" class="btn btn-secondary btn-sm"><i data-icon="arrow-left"></i> Sebelumnya</button>
+            <button type="button" id="btnNextPage" class="btn btn-secondary btn-sm">Berikutnya <i data-icon="arrow-right"></i></button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261112q"></script>
+  <script src="/assets/js/auth.js?v=20261112q"></script>
+  <script src="/assets/js/dashboard.js?v=20261112q"></script>
+</body>
+</html>

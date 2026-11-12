@@ -83,17 +83,17 @@ document.addEventListener("DOMContentLoaded", function () {
       if (status.ai_available) {
         aiStatusBanner.className = "alert alert-success";
         aiStatusBanner.innerHTML =
-          `<strong>Status Modul AI YOLO: AKTIF</strong> &mdash; ${escapeHtml(status.message)}`;
+          `<span><strong>AI aktif</strong> &mdash; foto dicek otomatis.</span>`;
       } else {
         aiStatusBanner.className = "alert alert-info";
         aiStatusBanner.innerHTML =
-          `<strong>Status Modul AI YOLO: Mode AI Belum Aktif</strong> &mdash; ${escapeHtml(status.message)}`;
+          `<span><strong>AI sedang tidak aktif.</strong> Laporan tetap bisa dikirim.</span>`;
       }
       aiStatusBanner.classList.remove("hidden");
     } catch (e) {
       aiStatusBanner.className = "alert alert-info";
       aiStatusBanner.innerHTML =
-        "Informasi: Status modul AI sedang dimuat. Anda tetap dapat mengirim laporan kebakaran.";
+        "<span>Laporan tetap bisa dikirim.</span>";
       aiStatusBanner.classList.remove("hidden");
     }
   }
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function (lat, lng) {
       latitudeInput.value = lat;
       longitudeInput.value = lng;
-      gpsStatusMsg.textContent = `Koordinat terpilih: ${lat}, ${lng}`;
+      gpsStatusMsg.textContent = "Lokasi dipilih ✓";
     }
   );
 
@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
   btnSetJambiCenter.addEventListener("click", function () {
     picker.setPickerCoordinate(cfg.DEFAULT_LAT, cfg.DEFAULT_LNG, true);
     gpsStatusMsg.textContent =
-      "Titik awal diarahkan ke pusat Kota Jambi. Silakan geser pin ke lokasi tepat kejadian.";
+      "Geser pin ke lokasi kejadian.";
   });
 
   // 3. Browser Geolocation API
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
       );
       return;
     }
-    gpsStatusMsg.textContent = "Sedang mengambil koordinat GPS perangkat...";
+    gpsStatusMsg.textContent = "Mencari lokasi Anda…";
     btnGetGps.disabled = true;
 
     navigator.geolocation.getCurrentPosition(
@@ -148,12 +148,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const lat = Number(pos.coords.latitude.toFixed(6));
         const lng = Number(pos.coords.longitude.toFixed(6));
         picker.setPickerCoordinate(lat, lng, true);
-        gpsStatusMsg.textContent = `Lokasi GPS berhasil diambil (Akurasi ±${Math.round(pos.coords.accuracy)}m): ${lat}, ${lng}`;
+        gpsStatusMsg.textContent = `Lokasi ditemukan ✓ (±${Math.round(pos.coords.accuracy)} m)`;
       },
       function (err) {
         btnGetGps.disabled = false;
         gpsStatusMsg.textContent =
-          "Gagal mengakses GPS otomatis. Silakan klik titik lokasi kejadian pada peta di bawah.";
+          "GPS gagal. Ketuk peta saja.";
         showAlert(
           `Tidak dapat mengambil GPS otomatis (${err.message}). Anda dapat memilih lokasi dengan mengklik peta Kota Jambi atau mengisi koordinat manual.`,
           "info"
@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", function () {
       resBboxTableBody.innerHTML = `
         <tr>
           <td colspan="4" style="text-align:center; color:#64748B;">
-            Tidak ada objek api/asap yang melewati ambang batas confidence pada gambar ini.
+            Tidak ada tanda api/asap yang jelas.
           </td>
         </tr>`;
     } else {
@@ -306,10 +306,10 @@ document.addEventListener("DOMContentLoaded", function () {
         .map(
           (b, idx) => `
           <tr>
-            <td>${idx + 1}</td>
-            <td><strong>${escapeHtml(b.class_name)}</strong> (ID: ${b.class_id})</td>
-            <td>${(Number(b.confidence) * 100).toFixed(1)}%</td>
-            <td><code>[${b.bbox_xyxy.join(", ")}]</code></td>
+            <td data-label="No">${idx + 1}</td>
+            <td data-label="Objek"><strong>${escapeHtml(b.class_name)}</strong> (ID: ${b.class_id})</td>
+            <td data-label="Keyakinan">${(Number(b.confidence) * 100).toFixed(1)}%</td>
+            <td data-label="Posisi"><code>[${b.bbox_xyxy.join(", ")}]</code></td>
           </tr>`
         )
         .join("");
@@ -329,7 +329,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const origText = btnPreviewAi.innerHTML;
     btnPreviewAi.disabled = true;
-    btnPreviewAi.innerHTML = `<span class="loading-spinner"></span> Memproses Gambar dengan YOLO...`;
+    btnPreviewAi.innerHTML = `<span class="loading-spinner"></span> AI sedang memeriksa foto...`;
 
     try {
       const formData = new FormData();
@@ -374,7 +374,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const origBtnHtml = btnSubmitReport.innerHTML;
     btnSubmitReport.disabled = true;
-    btnSubmitReport.innerHTML = `<span class="loading-spinner"></span> Memproses AI &amp; Menyimpan Laporan...`;
+    btnSubmitReport.innerHTML = `<span class="loading-spinner"></span> Mengirim &amp; memeriksa foto...`;
 
     try {
       const formData = new FormData();
@@ -397,7 +397,7 @@ document.addEventListener("DOMContentLoaded", function () {
       createdStatusBadge.innerHTML = getStatusBadgeHtml(created.status);
       createdDetectionSummary.innerHTML =
         `${getDetectionBadgeHtml(created.detection_result)} ` +
-        `<span style="margin-left:6px; font-weight:600;">Confidence: ${(Number(created.detection_confidence) * 100).toFixed(1)}%</span>`;
+        `<span style="margin-left:6px; font-weight:600;">Keyakinan: ${(Number(created.detection_confidence) * 100).toFixed(1)}%</span>`;
       btnTrackCreatedReport.href = `/tracking.html?code=${encodeURIComponent(created.tracking_code)}`;
 
       reportSuccessCard.classList.remove("hidden");

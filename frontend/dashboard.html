@@ -2,204 +2,91 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Petugas Verifikasi &mdash; ApiWaspada Kota Jambi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="robots" content="noindex" />
+  <title>Ringkasan — Dashboard Petugas ApiWaspada</title>
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
 </head>
-<body>
-  <!-- Navbar Khusus Petugas -->
-  <header class="navbar">
-    <div class="container navbar-inner">
-      <a href="/dashboard.html" class="navbar-brand">
-        <img src="/assets/images/logo.svg" alt="Logo ApiWaspada Kota Jambi" />
-      </a>
-      <ul class="nav-links">
-        <li><a href="/dashboard.html" class="nav-link active">Dashboard &amp; Statistik</a></li>
-        <li><a href="#peta-petugas" class="nav-link">Peta GIS</a></li>
-        <li><a href="#tabel-laporan" class="nav-link">Daftar Laporan</a></li>
-        <li><a href="/index.html" class="nav-link">Halaman Publik</a></li>
-      </ul>
-      <div class="nav-actions">
-        <span id="officerNameBadge" style="font-size:0.84rem; font-weight:700; color:#334155;">Petugas</span>
-        <button type="button" id="btnOfficerLogout" class="btn btn-secondary btn-sm">Logout</button>
-      </div>
-    </div>
-  </header>
+<body data-area="officer" data-page="dash-summary">
+  <script src="/assets/js/layout.js?v=20261112q"></script>
 
-  <main class="section" style="padding-top:1.75rem;">
+  <main>
     <div class="container">
-      <!-- Header Dashboard -->
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+      <header class="dash-head">
         <div>
-          <div class="section-eyebrow">Pusat Kendali &amp; Verifikasi Laporan</div>
-          <h1 style="font-size:1.75rem; font-weight:800;">Dashboard Pemantauan Kebakaran Kota Jambi</h1>
+          <span class="eyebrow">Dashboard petugas</span>
+          <h1 id="dashGreeting">Selamat datang</h1>
+          <p>Ringkasan laporan kebakaran Kota Jambi secara langsung.</p>
         </div>
-        <div style="display:flex; align-items:center; gap:0.75rem;">
+        <div class="dash-actions">
           <div id="dashboardAiStatus"></div>
-          <button type="button" id="btnRefreshDashboard" class="btn btn-secondary btn-sm">
-            Segarkan Data
-          </button>
+          <button type="button" id="btnRefreshDashboard" class="btn btn-secondary btn-sm"><i data-icon="refresh"></i> Segarkan</button>
         </div>
-      </div>
+      </header>
 
-      <!-- 5 Kartu Statistik Utama (KPI) -->
       <div class="kpi-grid">
         <div class="kpi-card">
-          <div class="kpi-label">Total Laporan</div>
+          <div class="kpi-label"><i data-icon="file"></i> Total laporan</div>
           <div id="kpiTotal" class="kpi-value">0</div>
         </div>
-        <div class="kpi-card kpi-pending">
-          <div class="kpi-label">Menunggu Verifikasi</div>
-          <div id="kpiPending" class="kpi-value" style="color:#B45309;">0</div>
-        </div>
-        <div class="kpi-card kpi-verified">
-          <div class="kpi-label">Laporan Terverifikasi</div>
-          <div id="kpiVerified" class="kpi-value" style="color:#1D4ED8;">0</div>
-        </div>
-        <div class="kpi-card kpi-rejected">
-          <div class="kpi-label">Ditolak / Tidak Valid</div>
-          <div id="kpiRejected" class="kpi-value" style="color:#475569;">0</div>
-        </div>
-        <div class="kpi-card kpi-completed">
-          <div class="kpi-label">Penanganan Selesai</div>
-          <div id="kpiCompleted" class="kpi-value" style="color:#15803D;">0</div>
-        </div>
+        <a href="/dashboard-laporan.html?status=pending" class="kpi-card kpi-pending" style="color:inherit">
+          <div class="kpi-label"><i data-icon="hourglass"></i> Menunggu</div>
+          <div id="kpiPending" class="kpi-value">0</div>
+        </a>
+        <a href="/dashboard-laporan.html?status=verified" class="kpi-card kpi-verified" style="color:inherit">
+          <div class="kpi-label"><i data-icon="shield"></i> Terverifikasi</div>
+          <div id="kpiVerified" class="kpi-value">0</div>
+        </a>
+        <a href="/dashboard-laporan.html?status=rejected" class="kpi-card kpi-rejected" style="color:inherit">
+          <div class="kpi-label"><i data-icon="ban"></i> Ditolak</div>
+          <div id="kpiRejected" class="kpi-value">0</div>
+        </a>
+        <a href="/dashboard-laporan.html?status=completed" class="kpi-card kpi-completed" style="color:inherit">
+          <div class="kpi-label"><i data-icon="check-circle"></i> Selesai</div>
+          <div id="kpiCompleted" class="kpi-value">0</div>
+        </a>
       </div>
 
-      <!-- 3 Grafik Analitik Chart.js -->
-      <div class="grid-3" style="margin-bottom:2rem;">
-        <div class="card">
-          <h3 style="font-size:0.98rem; font-weight:800; margin-bottom:0.85rem;">
-            Tren Laporan Berdasarkan Tanggal
-          </h3>
-          <div style="height:240px; position:relative;">
-            <canvas id="chartReportsByDate"></canvas>
+      <div class="grid" style="grid-template-columns:minmax(0,1fr)">
+        <div class="grid-3">
+          <div class="card" style="grid-column:1 / -1">
+            <div class="card-head" style="margin-bottom:.5rem">
+              <div><h2 class="card-title"><i data-icon="chart"></i> Tren laporan harian</h2><p class="card-sub">Jumlah laporan masuk per tanggal.</p></div>
+            </div>
+            <div class="chart-box"><canvas id="chartReportsByDate" aria-label="Grafik tren laporan harian"></canvas></div>
           </div>
-        </div>
-        <div class="card">
-          <h3 style="font-size:0.98rem; font-weight:800; margin-bottom:0.85rem;">
-            Distribusi Status Laporan
-          </h3>
-          <div style="height:240px; position:relative;">
-            <canvas id="chartStatusDist"></canvas>
+          <div class="card">
+            <h2 class="card-title" style="margin-bottom:.75rem">Distribusi status</h2>
+            <div class="chart-box"><canvas id="chartStatusDist" aria-label="Grafik distribusi status"></canvas></div>
           </div>
-        </div>
-        <div class="card">
-          <h3 style="font-size:0.98rem; font-weight:800; margin-bottom:0.85rem;">
-            Distribusi Hasil Deteksi AI YOLO
-          </h3>
-          <div style="height:240px; position:relative;">
-            <canvas id="chartDetectionDist"></canvas>
+          <div class="card">
+            <h2 class="card-title" style="margin-bottom:.75rem">Hasil deteksi AI</h2>
+            <div class="chart-box"><canvas id="chartDetectionDist" aria-label="Grafik distribusi hasil deteksi AI"></canvas></div>
           </div>
-        </div>
-      </div>
-
-      <!-- Peta GIS Persebaran Laporan -->
-      <div class="card" id="peta-petugas" style="margin-bottom:2rem;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:0.85rem;">
-          <div>
-            <h2 style="font-size:1.25rem; font-weight:800;">Peta Sebaran Titik Laporan (GIS Kota Jambi)</h2>
-            <p style="font-size:0.86rem; color:#64748B;">
-              Klik marker untuk melihat ringkasan dan membuka halaman pemeriksaan detail laporan.
-            </p>
-          </div>
-        </div>
-        <div id="officerDashboardMap" class="map-box" style="height:390px;"></div>
-        <div class="map-legend">
-          <span class="legend-item"><span class="legend-marker" style="background:#F59E0B;"></span>Pending (Menunggu Verifikasi)</span>
-          <span class="legend-item"><span class="legend-marker" style="background:#2563EB;"></span>Verified (Terverifikasi)</span>
-          <span class="legend-item"><span class="legend-marker" style="background:#64748B;"></span>Rejected (Ditolak)</span>
-          <span class="legend-item"><span class="legend-marker" style="background:#16A34A;"></span>Completed (Selesai)</span>
-        </div>
-      </div>
-
-      <!-- Tabel Daftar Laporan + Search, Filter, & Pagination -->
-      <div class="card" id="tabel-laporan">
-        <h2 style="font-size:1.25rem; font-weight:800; margin-bottom:1rem;">
-          Tabel Manajemen &amp; Verifikasi Laporan
-        </h2>
-
-        <!-- Baris Filter & Pencarian -->
-        <div class="grid-4" style="gap:0.75rem; margin-bottom:1rem; align-items:end;">
-          <div>
-            <label for="filterSearch" class="form-label" style="font-size:0.8rem;">Cari Kata Kunci / ID / Kode</label>
-            <input
-              type="text"
-              id="filterSearch"
-              class="form-control"
-              placeholder="Cari ID, kode AW-..., deskripsi, pelapor..."
-            />
-          </div>
-          <div>
-            <label for="filterStatus" class="form-label" style="font-size:0.8rem;">Filter Status</label>
-            <select id="filterStatus" class="form-control">
-              <option value="">Semua Status</option>
-              <option value="pending">Pending</option>
-              <option value="verified">Verified</option>
-              <option value="rejected">Rejected</option>
-              <option value="completed">Completed</option>
-            </select>
-          </div>
-          <div>
-            <label for="filterDateFrom" class="form-label" style="font-size:0.8rem;">Dari Tanggal</label>
-            <input type="date" id="filterDateFrom" class="form-control" />
-          </div>
-          <div>
-            <label for="filterDateTo" class="form-label" style="font-size:0.8rem;">Sampai Tanggal</label>
-            <input type="date" id="filterDateTo" class="form-control" />
-          </div>
-        </div>
-
-        <div style="display:flex; gap:0.65rem; margin-bottom:1.25rem;">
-          <button type="button" id="btnApplyFilter" class="btn btn-primary btn-sm">Terapkan Filter</button>
-          <button type="button" id="btnResetFilter" class="btn btn-secondary btn-sm">Reset Filter</button>
-        </div>
-
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>ID &amp; Kode</th>
-                <th>Waktu Laporan</th>
-                <th>Lokasi &amp; Pelapor</th>
-                <th>Hasil Deteksi AI</th>
-                <th>Confidence</th>
-                <th>Status</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="dashboardReportsTableBody"></tbody>
-          </table>
-        </div>
-
-        <!-- Pagination Controls -->
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-top:1.15rem; padding-top:0.85rem; border-top:1px solid #E2E8F0;">
-          <div id="paginationInfo" style="font-size:0.86rem; color:#475569; font-weight:600;">
-            Halaman 1 dari 1
-          </div>
-          <div style="display:flex; gap:0.5rem;">
-            <button type="button" id="btnPrevPage" class="btn btn-secondary btn-sm">&larr; Sebelumnya</button>
-            <button type="button" id="btnNextPage" class="btn btn-secondary btn-sm">Berikutnya &rarr;</button>
+          <div class="card">
+            <div class="card-head" style="margin-bottom:.75rem">
+              <h2 class="card-title"><i data-icon="hourglass"></i> Perlu diperiksa</h2>
+              <a href="/dashboard-laporan.html?status=pending" class="btn btn-soft btn-sm">Semua</a>
+            </div>
+            <div id="pendingQuickList" class="pending-list">
+              <div class="skeleton" style="height:58px"></div>
+              <div class="skeleton" style="height:58px"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </main>
 
-  <footer class="footer">
-    <div class="container" style="text-align:center;">
-      &copy; 2026 Prototype ApiWaspada Kota Jambi &bull; Dashboard Verifikasi Petugas
-    </div>
-  </footer>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="/assets/js/config.js"></script>
-  <script src="/assets/js/utils.js"></script>
-  <script src="/assets/js/map.js"></script>
-  <script src="/assets/js/auth.js"></script>
-  <script src="/assets/js/dashboard.js"></script>
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261112q"></script>
+  <script src="/assets/js/auth.js?v=20261112q"></script>
+  <script src="/assets/js/dashboard.js?v=20261112q"></script>
 </body>
 </html>

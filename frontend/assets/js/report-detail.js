@@ -17,9 +17,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   const officer = await window.ApiWaspadaAuth.verifyOfficerSessionOrRedirect();
   if (!officer) return;
 
-  const officerBadge = document.getElementById("detailOfficerBadge");
+  const officerBadge = document.getElementById("officerNameBadge");
   if (officerBadge) {
-    officerBadge.textContent = `${officer.full_name} (@${officer.username})`;
+    officerBadge.textContent = officer.full_name || officer.username;
+  }
+  const officerAvatar = document.getElementById("officerAvatar");
+  if (officerAvatar) {
+    officerAvatar.textContent = String(officer.full_name || officer.username || "P").trim().charAt(0).toUpperCase();
   }
 
   const params = new URLSearchParams(window.location.search);
@@ -66,6 +70,21 @@ document.addEventListener("DOMContentLoaded", async function () {
   window.ApiWaspadaMap.initBaseTileLayers(detailMap);
   let locationMarker = null;
 
+  // Tombol pilihan status (sinkron dengan <select> yang dipakai untuk pengiriman)
+  const statusButtons = document.querySelectorAll("#statusOptions .status-option");
+  function syncStatusButtons() {
+    statusButtons.forEach((b) => {
+      b.setAttribute("aria-pressed", b.dataset.value === newStatusSelect.value ? "true" : "false");
+    });
+  }
+  statusButtons.forEach((b) => {
+    b.addEventListener("click", function () {
+      newStatusSelect.value = b.dataset.value;
+      syncStatusButtons();
+    });
+  });
+  syncStatusButtons();
+
   function showDetailAlert(msg, type = "info") {
     detailAlert.className = `alert alert-${type}`;
     detailAlert.textContent = msg;
@@ -93,6 +112,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     detResultImage.src = resolveMediaUrl(report.result_image_url || report.image_url);
 
     newStatusSelect.value = report.status;
+    syncStatusButtons();
 
     const boxes = report.detections || [];
     if (boxes.length === 0) {
@@ -107,10 +127,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         .map(
           (b, idx) => `
           <tr>
-            <td>${idx + 1}</td>
-            <td><strong>${escapeHtml(b.class_name)}</strong> (ID: ${b.class_id})</td>
-            <td>${(Number(b.confidence) * 100).toFixed(1)}%</td>
-            <td><code>[${b.bbox_xyxy.join(", ")}]</code></td>
+            <td data-label="No">${idx + 1}</td>
+            <td data-label="Kelas"><strong>${escapeHtml(b.class_name)}</strong> (ID: ${b.class_id})</td>
+            <td data-label="Keyakinan">${(Number(b.confidence) * 100).toFixed(1)}%</td>
+            <td data-label="Kotak"><code>[${b.bbox_xyxy.join(", ")}]</code></td>
           </tr>`
         )
         .join("");
@@ -141,14 +161,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         .map(
           (h) => `
           <div class="timeline-item">
-            <div style="font-size:0.8rem; color:#64748B;">
+            <div class="timeline-time">
               ${formatDateTimeWIB(h.changed_at)} &bull; Oleh: <strong>${escapeHtml(h.changed_by || "system")}</strong>
             </div>
             <div style="margin:0.3rem 0;">
               ${h.previous_status ? `<span style="font-size:0.82rem; color:#64748B;">${escapeHtml(h.previous_status)} &rarr; </span>` : ""}
               ${getStatusBadgeHtml(h.new_status)}
             </div>
-            <div style="font-size:0.92rem; color:#0F172A;">
+            <div class="timeline-note">
               ${escapeHtml(h.note)}
             </div>
           </div>`
@@ -197,6 +217,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         `Status laporan #${updated.id} berhasil diperbarui menjadi '${updated.status.toUpperCase()}' dan tercatat dalam riwayat.`,
         "success"
       );
+      detailAlert.scrollIntoView({ behavior: "smooth", block: "center" });
     } catch (err) {
       showDetailAlert(err.message || "Gagal memperbarui status laporan.", "error");
     } finally {

@@ -11,9 +11,11 @@ REM Pastikan berada di direktori root project
 cd /d "%~dp0"
 
 REM 1. Periksa ketersediaan virtual environment
-if exist "venv\Scripts\activate.bat" (
-    echo [INFO] Mengaktifkan virtual environment ^(venv^)...
-    call "venv\Scripts\activate.bat"
+REM    Python venv dipanggil langsung lewat path lengkap agar tetap benar
+REM    walaupun folder proyek dipindah/diganti nama (activate.bat menyimpan path lama).
+set "PY=%~dp0venv\Scripts\python.exe"
+if exist "%PY%" (
+    echo [INFO] Menggunakan Python dari virtual environment ^(venv^)...
 ) else (
     echo [WARN] Folder venv belum ditemukan.
     echo [INFO] Membuat virtual environment baru menggunakan Python...
@@ -23,10 +25,16 @@ if exist "venv\Scripts\activate.bat" (
         pause
         exit /b 1
     )
-    call "venv\Scripts\activate.bat"
     echo [INFO] Menginstal dependency dari requirements.txt...
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
+    "%PY%" -m pip install --upgrade pip
+    "%PY%" -m pip install -r requirements.txt
+)
+
+REM Pastikan modul AI YOLO (ultralytics) tersedia di venv
+"%PY%" -c "import ultralytics" >nul 2>&1
+if errorlevel 1 (
+    echo [WARN] Modul ultralytics belum terpasang di venv. Menginstal dependency...
+    "%PY%" -m pip install -r requirements.txt
 )
 
 REM 2. Siapkan file .env jika belum ada
@@ -45,7 +53,7 @@ if not exist "ml\weights" mkdir "ml\weights"
 
 REM 4. Inisialisasi akun petugas default dan data contoh jika database masih kosong
 echo [INFO] Memeriksa inisialisasi database dan akun petugas...
-python scripts\init_admin.py
+"%PY%" scripts\init_admin.py
 
 REM 5. Periksa status model YOLO
 if exist "ml\weights\best.pt" (
@@ -68,5 +76,5 @@ echo   - Dokumentasi OpenAPI: http://127.0.0.1:8000/docs
 echo ============================================================================
 echo.
 
-python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+"%PY%" -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 pause
