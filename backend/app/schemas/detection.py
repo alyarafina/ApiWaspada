@@ -24,6 +24,17 @@ class BoundingBoxItem(BaseModel):
     )
 
 
+class ModelOption(BaseModel):
+    """Satu pilihan model YOLO yang dapat dipakai untuk deteksi."""
+
+    key: str = Field(..., description="Kunci model, mis. 'fire_m'")
+    label: str = Field(..., description="Nama model untuk ditampilkan")
+    description: str = Field("", description="Keterangan singkat model")
+    file: str = Field(..., description="Lokasi relatif file bobot model")
+    available: bool = Field(..., description="Apakah file model ada di disk")
+    is_default: bool = Field(False, description="Apakah model ini dipakai secara default")
+
+
 class DetectionStatusResponse(BaseModel):
     """Response untuk memeriksa status ketersediaan model YOLO (`GET /api/detect/status`)."""
 
@@ -37,6 +48,10 @@ class DetectionStatusResponse(BaseModel):
     class_mapping: dict = Field(..., description="Pemetaan ID kelas ke nama kelas")
     status_label: str = Field(..., description="Status operasional layanan AI")
     message: str = Field(..., description="Penjelasan status layanan AI")
+    default_model: str = Field("", description="Kunci model yang dipakai secara default")
+    available_models: List[ModelOption] = Field(
+        default_factory=list, description="Daftar model YOLO yang dapat dipilih"
+    )
     disclaimer: str = Field(default=AI_DISCLAIMER_TEXT)
 
 
@@ -63,4 +78,5 @@ class DetectionResponse(BaseModel):
     inference_time_ms: float = Field(..., ge=0.0, description="Waktu pemrosesan inferensi dalam milidetik")
     image_dimensions: List[int] = Field(..., description="Dimensi gambar [width, height]")
     model_info: str = Field(..., description="Informasi model yang digunakan")
+    model_key: Optional[str] = Field(None, description="Kunci model yang dipakai, mis. 'fire_m'")
     disclaimer: str = Field(default=AI_DISCLAIMER_TEXT)

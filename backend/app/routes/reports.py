@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, File, Form, Path, Query, UploadFile, sta
 from backend.app.database import Session, get_db
 from backend.app.dependencies import get_current_officer
 from backend.app.models.user import Officer
+from backend.app.routes.detect import resolve_model_or_400
 from backend.app.schemas.report import (
     ReportHistoryItem,
     ReportListResponse,
@@ -48,13 +49,20 @@ def create_report_endpoint(
         max_length=120,
         description="Nama pelapor (opsional, hanya ditampilkan untuk petugas)",
     ),
+    model: Optional[str] = Form(
+        default=None,
+        max_length=32,
+        description="Kunci model YOLO opsional: fire_n, fire_m, fire_l, atau best",
+    ),
     db: Session = Depends(get_db),
 ) -> ReportPublicResponse:
     """
     Menerima laporan masyarakat, memvalidasi foto dan koordinat GPS,
     menjalankan deteksi YOLO, dan menyimpan laporan ke database SQLite.
     """
+    model_key = resolve_model_or_400(model)
     return create_new_report(
+        model_key=model_key,
         db=db,
         image=image,
         description=description,

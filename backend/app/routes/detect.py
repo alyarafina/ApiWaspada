@@ -3,10 +3,10 @@ Router Deteksi Visual AI YOLO (`/api/detect`).
 """
 from typing import Optional
 
-from fastapi import APIRouter, File, Form, UploadFile, status
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 
 from backend.app.schemas.detection import DetectionResponse, DetectionStatusResponse
-from backend.app.services.ai_service import ai_service
+from backend.app.services.ai_service import UnknownModelError, ai_service
 from backend.app.utils.file_handler import save_uploaded_image, validate_and_read_image
 
 router = APIRouter(prefix="/api/detect", tags=["AI Detection"])
@@ -40,12 +40,18 @@ def detect_fire_and_smoke(
         le=0.95,
         description="Ambang batas confidence opsional (default: 0.25)",
     ),
+    model: Optional[str] = Form(
+        default=None,
+        max_length=32,
+        description="Kunci model opsional: fire_n, fire_m, fire_l, atau best (default: model default server)",
+    ),
 ) -> DetectionResponse:
     """
     Memvalidasi gambar yang diunggah, menyimpannya ke `storage/uploads/`,
-    memprosesnya menggunakan model YOLO, membuat visualisasi bounding box di
+    memprosesnya menggunakan model YOLO pilihan, membuat visualisasi bounding box di
     `storage/results/`, dan mengembalikan hasil deteksi beserta confidence score.
     """
+    model_key = resolve_model_or_400(model)
     file_bytes, ext, _ = validate_and_read_image(image)
     saved_path, relative_url = save_uploaded_image(file_bytes, ext, prefix="det")
 
@@ -53,4 +59,13 @@ def detect_fire_and_smoke(
         image_path=saved_path,
         original_image_url=relative_url,
         conf_threshold=confidence,
+        model_key=model_key,
     )
+
+
+def resolve_model_or_400(model: Optional[str]) -> str:
+    """Memvalidasi kunci model dari form; model tidak dikenal menghasilkan HTTP 400."""
+    try:
+        return ai_service.resolve_model_key(model)
+    except UnknownModelError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))

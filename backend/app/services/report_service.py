@@ -115,6 +115,7 @@ def create_new_report(
     latitude: float,
     longitude: float,
     reporter_name: Optional[str] = None,
+    model_key: Optional[str] = None,
 ) -> ReportPublicResponse:
     """
     Memvalidasi input, menyimpan foto, menjalankan deteksi YOLO, menyimpan laporan
@@ -141,6 +142,7 @@ def create_new_report(
     detection_res = ai_service.run_detection(
         image_path=saved_path,
         original_image_url=relative_image_url,
+        model_key=model_key,
     )
 
     detections_serialized = json.dumps([d.dict() for d in detection_res.detections])

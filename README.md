@@ -247,6 +247,21 @@ python ml/predict.py --source storage/uploads --weights ml/weights/best.pt --con
 - Jika Anda melatih model di komputer lain atau Google Colab, cukup salin file `best.pt` hasil pelatihan ke `ApiWaspada/ml/weights/best.pt`.
 - Begitu file `ml/weights/best.pt` tersedia, endpoint `/api/detect/status` otomatis berubah menjadi **AI Aktif** tanpa perlu me-restart atau mengubah kode program.
 
+### Pilihan Model (Nano / Medium / Large)
+Selain `best.pt`, aplikasi mendukung tiga model YOLOv8 hasil latih D-Fire Dataset dari repositori *wildfire-detection* (lisensi MIT):
+
+| Kunci | File | mAP@50 (D-Fire test) | Keterangan |
+|---|---|---|---|
+| `fire_n` | `ml/weights/fire_n.pt` | 0.787 | Paling cepat & ringan |
+| `fire_m` | `ml/weights/fire_m.pt` | 0.801 | Seimbang, **default** |
+| `fire_l` | `ml/weights/fire_l.pt` | 0.812 | Paling akurat, paling berat |
+| `best` | `ml/weights/best.pt` | – | Hasil pelatihan sendiri |
+
+- Pengguna memilih model lewat menu **Model AI** di halaman laporan; API menerima field form `model` pada `POST /api/detect` dan `POST /api/reports`.
+- Model default diatur dengan `YOLO_DEFAULT_MODEL` di `.env`. Jika file model default tidak ada, model pertama yang tersedia dipakai.
+- Model dimuat ke memori saat pertama kali dipakai, lalu disimpan untuk permintaan berikutnya.
+- File `*.pt` tidak ikut ke git (lihat `.gitignore`), jadi salin manual ke `ml/weights/` di setiap komputer/server.
+
 ---
 
 ## 13. Konfigurasi Environment (`.env`)

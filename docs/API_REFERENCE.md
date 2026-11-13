@@ -15,8 +15,8 @@ Dokumentasi interaktif OpenAPI (Swagger UI) dapat diakses secara langsung saat b
 | **Auth** | `POST` | `/api/auth/login` | Publik | Login petugas dengan username & password untuk mendapatkan token Bearer JWT. |
 | **Auth** | `GET` | `/api/auth/me` | Petugas (Bearer) | Mengambil profil petugas yang sedang aktif login. |
 | **Auth** | `POST` | `/api/auth/logout` | Petugas | Menghapus cookie sesi petugas. |
-| **AI Detection** | `GET` | `/api/detect/status` | Publik | Memeriksa apakah `ml/weights/best.pt` tersedia beserta konfigurasi device & kelas. |
-| **AI Detection** | `POST` | `/api/detect` | Publik | Mengunggah gambar untuk dianalisis oleh YOLO dan menghasilkan citra visualisasi *bounding box*. |
+| **AI Detection** | `GET` | `/api/detect/status` | Publik | Status model default, konfigurasi device & kelas, serta daftar model yang dapat dipilih (`available_models`, `default_model`). |
+| **AI Detection** | `POST` | `/api/detect` | Publik | Mengunggah gambar untuk dianalisis oleh YOLO dan menghasilkan citra visualisasi *bounding box*. Field opsional `model`: `fire_n`, `fire_m`, `fire_l`, `best`. |
 | **Reports** | `POST` | `/api/reports` | Publik | Mengirim laporan baru (foto, deskripsi, latitude, longitude), memproses AI, dan menyimpan ke DB. |
 | **Reports** | `GET` | `/api/reports` | Publik | Mengambil daftar laporan publik dengan pagination dan filter status. |
 | **Reports** | `GET` | `/api/reports/{report_id}` | Publik | Mengambil detail laporan berdasarkan ID numerik atau Kode Pelacakan (`AW-...`). |
