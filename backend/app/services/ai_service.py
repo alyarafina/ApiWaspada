@@ -8,8 +8,10 @@ Mendukung:
 4. Mode Graceful Fallback yang transparan apabila file `ml/weights/best.pt` belum tersedia,
    tanpa membuat model palsu.
 """
+import threading
 import time
 import uuid
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -24,6 +26,7 @@ from backend.app.schemas.detection import (
     BoundingBoxItem,
     DetectionResponse,
     DetectionStatusResponse,
+    ModelOption,
 )
 
 # Status resmi sesuai spesifikasi Bagian 4
@@ -59,20 +62,93 @@ def normalize_class_label(raw_name: str) -> str:
     return raw_name.strip().capitalize()
 
 
+class UnknownModelError(ValueError):
+    """Dilempar bila kunci model yang diminta tidak terdaftar."""
+
+
+@dataclass(frozen=True)
+class ModelSpec:
+    """Definisi satu model YOLO yang dapat dipilih pengguna."""
+
+    key: str
+    label: str
+    description: str
+    path: Path
+
+
+def build_model_registry() -> Dict[str, ModelSpec]:
+    """
+    Daftar model yang dapat dipilih. Tiga model `fire_*` adalah YOLOv8 hasil latih
+    D-Fire Dataset (sumber: repositori wildfire-detection, lisensi MIT);
+    `best` adalah model hasil pelatihan sendiri (`YOLO_MODEL_PATH`).
+    """
+    weights_dir = settings.BASE_DIR / "ml" / "weights"
+    specs = [
+        ModelSpec("fire_n", "YOLOv8 Nano", "Paling cepat & ringan (mAP@50 0.787)", weights_dir / "fire_n.pt"),
+        ModelSpec("fire_m", "YOLOv8 Medium", "Seimbang, disarankan (mAP@50 0.801)", weights_dir / "fire_m.pt"),
+        ModelSpec("fire_l", "YOLOv8 Large", "Paling akurat, paling berat (mAP@50 0.812)", weights_dir / "fire_l.pt"),
+        ModelSpec("best", "Model kustom", "Hasil pelatihan sendiri (best.pt)", settings.YOLO_MODEL_PATH),
+    ]
+    return {s.key: s for s in specs}
+
+
 class AIDetectionService:
-    """Service singleton untuk mengelola model YOLO dan inferensi gambar."""
+    """Service singleton untuk mengelola beberapa model YOLO dan inferensi gambar."""
 
     def __init__(self) -> None:
-        self.model_path: Path = settings.YOLO_MODEL_PATH
+        self.registry: Dict[str, ModelSpec] = build_model_registry()
         self.conf_threshold: float = settings.YOLO_CONFIDENCE_THRESHOLD
         self.iou_threshold: float = settings.YOLO_IOU_THRESHOLD
         self.imgsz: int = settings.YOLO_IMAGE_SIZE
-        self._model: Optional[Any] = None
+        self._models: Dict[str, Any] = {}
+        self._mappings: Dict[str, Dict[int, str]] = {}
+        self._load_errors: Dict[str, str] = {}
+        self._load_lock = threading.Lock()
+        self._default_override: Optional[str] = None
         self._custom_predictor: Optional[Callable[[np.ndarray, float], List[Dict[str, Any]]]] = None
-        self._model_loaded: bool = False
-        self._load_error: Optional[str] = None
         self._device: str = self._resolve_device(settings.YOLO_DEVICE)
         self._class_mapping: Dict[int, str] = self._load_class_mapping_from_yaml()
+
+    # ------------------------------------------------------------------
+    # Pemilihan model
+    # ------------------------------------------------------------------
+    @property
+    def default_model_key(self) -> str:
+        """Model default dari `YOLO_DEFAULT_MODEL`; jika filenya tidak ada, model pertama yang tersedia."""
+        if self._default_override:
+            return self._default_override
+        preferred = settings.YOLO_DEFAULT_MODEL
+        if preferred in self.registry and self.model_file_exists(preferred):
+            return preferred
+        for key in self.registry:
+            if self.model_file_exists(key):
+                return key
+        return preferred if preferred in self.registry else "fire_m"
+
+    def resolve_model_key(self, model_key: Optional[str]) -> str:
+        """Memvalidasi kunci model dari pengguna; None/kosong berarti model default."""
+        key = (model_key or "").strip().lower()
+        if not key:
+            return self.default_model_key
+        if key not in self.registry:
+            raise UnknownModelError(
+                f"Model '{model_key}' tidak dikenal. Pilihan: {', '.join(self.registry)}."
+            )
+        return key
+
+    @property
+    def model_path(self) -> Path:
+        """Lokasi file model default (kompatibel dengan kode lama)."""
+        return self.registry[self.default_model_key].path
+
+    @model_path.setter
+    def model_path(self, path: Path) -> None:
+        """Memakai file bobot tertentu sebagai model default (dipakai `ml/predict.py`)."""
+        path = Path(path).resolve()
+        self.registry["custom"] = ModelSpec("custom", "Model pilihan", "File bobot dari argumen", path)
+        self._models.pop("custom", None)
+        self._mappings.pop("custom", None)
+        self._default_override = "custom"
 
     def _resolve_device(self, configured_device: str) -> str:
         """Menentukan perangkat komputasi (GPU NVIDIA CUDA jika tersedia, atau CPU)."""
@@ -109,54 +185,57 @@ class AIDetectionService:
                 mapping[int(k)] = normalize_class_label(v)
         return mapping
 
-    def model_file_exists(self) -> bool:
-        """
-        Memeriksa apakah file bobot `ml/weights/best.pt` benar-benar ada
-        dan bukan file kosong (> 1 KB).
-        """
-        return (
-            self.model_path.exists()
-            and self.model_path.is_file()
-            and self.model_path.stat().st_size > 1024
-        )
+    def _rel_path(self, path: Path) -> str:
+        try:
+            return path.relative_to(settings.BASE_DIR).as_posix()
+        except ValueError:
+            return str(path)
 
-    def ensure_model_loaded(self) -> bool:
-        """Memuat model YOLO ke memori jika file `best.pt` tersedia."""
+    def model_file_exists(self, model_key: Optional[str] = None) -> bool:
+        """
+        Memeriksa apakah file bobot model (default bila `model_key` kosong)
+        benar-benar ada dan bukan file kosong (> 1 KB).
+        """
+        path = self.registry[model_key].path if model_key else self.model_path
+        return path.exists() and path.is_file() and path.stat().st_size > 1024
+
+    def ensure_model_loaded(self, model_key: Optional[str] = None) -> bool:
+        """Memuat model YOLO ke memori (sekali saja per model) jika filenya tersedia."""
         if self._custom_predictor is not None:
             return True
-        if self._model_loaded and self._model is not None:
+        key = self.resolve_model_key(model_key)
+        if key in self._models:
             return True
-        if not self.model_file_exists():
-            self._model_loaded = False
-            self._model = None
-            self._load_error = (
-                f"File model bobot YOLO belum tersedia di '{self.model_path.relative_to(settings.BASE_DIR)}'. "
+        spec = self.registry[key]
+        if not self.model_file_exists(key):
+            self._load_errors[key] = (
+                f"File model bobot YOLO belum tersedia di '{self._rel_path(spec.path)}'. "
                 "Sistem berjalan dalam Mode AI Belum Aktif."
             )
             return False
 
-        try:
-            from ultralytics import YOLO
+        with self._load_lock:
+            if key in self._models:
+                return True
+            try:
+                from ultralytics import YOLO
 
-            self._model = YOLO(str(self.model_path))
-            # Ambil pemetaan kelas asli dari metadata internal model YOLO
-            model_names = getattr(self._model, "names", None)
-            if isinstance(model_names, dict) and model_names:
-                self._class_mapping = {
-                    int(k): normalize_class_label(str(v)) for k, v in model_names.items()
-                }
-            elif isinstance(model_names, list) and model_names:
-                self._class_mapping = {
-                    idx: normalize_class_label(str(v)) for idx, v in enumerate(model_names)
-                }
-            self._model_loaded = True
-            self._load_error = None
-            return True
-        except Exception as exc:
-            self._model_loaded = False
-            self._model = None
-            self._load_error = f"Gagal memuat model YOLO: {str(exc)}"
-            return False
+                model = YOLO(str(spec.path))
+                # Ambil pemetaan kelas asli dari metadata internal model YOLO.
+                # Urutan kelas tiap model bisa berbeda (mis. 0:smoke,1:fire vs 0:fire,1:smoke).
+                mapping = dict(self._class_mapping)
+                model_names = getattr(model, "names", None)
+                if isinstance(model_names, dict) and model_names:
+                    mapping = {int(k): normalize_class_label(str(v)) for k, v in model_names.items()}
+                elif isinstance(model_names, list) and model_names:
+                    mapping = {idx: normalize_class_label(str(v)) for idx, v in enumerate(model_names)}
+                self._mappings[key] = mapping
+                self._models[key] = model
+                self._load_errors.pop(key, None)
+                return True
+            except Exception as exc:
+                self._load_errors[key] = f"Gagal memuat model YOLO '{key}': {str(exc)}"
+                return False
 
     def set_custom_predictor(
         self,
@@ -175,37 +254,49 @@ class AIDetectionService:
 
     def get_status(self) -> DetectionStatusResponse:
         """Mengembalikan status kesiapan modul AI YOLO untuk endpoint `/api/detect/status`."""
-        is_ready = self.ensure_model_loaded()
-        rel_path = "ml/weights/best.pt"
-        try:
-            rel_path = self.model_path.relative_to(settings.BASE_DIR).as_posix()
-        except ValueError:
-            rel_path = str(self.model_path)
+        default_key = self.default_model_key
+        is_ready = self.ensure_model_loaded(default_key)
+        default_spec = self.registry[default_key]
+        class_mapping = self._mappings.get(default_key, self._class_mapping)
 
         if is_ready:
             status_label = "AI Aktif (Siap Inferensi)"
             msg = (
-                f"Model YOLO berhasil dimuat pada perangkat '{self._device}' "
-                f"dengan pemetaan kelas {self._class_mapping}."
+                f"Model default {default_spec.label} ({default_key}) dimuat pada perangkat "
+                f"'{self._device}' dengan pemetaan kelas {class_mapping}."
             )
         else:
             status_label = "Mode AI Belum Aktif (Menunggu Model best.pt)"
             msg = (
-                self._load_error
-                or "Model ml/weights/best.pt belum tersedia. Laporan masyarakat tetap dapat dikirim dan diverifikasi manual oleh petugas."
+                self._load_errors.get(default_key)
+                or "Model YOLO belum tersedia. Laporan masyarakat tetap dapat dikirim dan diverifikasi manual oleh petugas."
             )
+
+        options = [
+            ModelOption(
+                key=spec.key,
+                label=spec.label,
+                description=spec.description,
+                file=self._rel_path(spec.path),
+                available=self.model_file_exists(spec.key),
+                is_default=spec.key == default_key,
+            )
+            for spec in self.registry.values()
+        ]
 
         return DetectionStatusResponse(
             ai_available=is_ready,
-            model_loaded=self._model_loaded or (self._custom_predictor is not None),
-            model_path=rel_path,
-            model_exists_on_disk=self.model_file_exists(),
+            model_loaded=(default_key in self._models) or (self._custom_predictor is not None),
+            model_path=self._rel_path(default_spec.path),
+            model_exists_on_disk=self.model_file_exists(default_key),
             device=self._device,
             confidence_threshold=self.conf_threshold,
             iou_threshold=self.iou_threshold,
-            class_mapping=self._class_mapping,
+            class_mapping=class_mapping,
             status_label=status_label,
             message=msg,
+            default_model=default_key,
+            available_models=options,
             disclaimer=AI_DISCLAIMER_TEXT,
         )
 
@@ -294,26 +385,32 @@ class AIDetectionService:
         image_path: Path,
         original_image_url: Optional[str] = None,
         conf_threshold: Optional[float] = None,
+        model_key: Optional[str] = None,
     ) -> DetectionResponse:
         """
-        Menjalankan deteksi YOLO pada satu file gambar yang berada di `image_path`.
+        Menjalankan deteksi YOLO pada satu file gambar yang berada di `image_path`
+        menggunakan model `model_key` (default bila kosong).
         Jika model belum tersedia, mengembalikan status fallback yang jelas tanpa error 500.
         """
         start_time = time.perf_counter()
         threshold = conf_threshold if conf_threshold is not None else self.conf_threshold
+        key = self.resolve_model_key(model_key)
+        spec = self.registry[key]
 
         image_bgr = cv2.imread(str(image_path))
         if image_bgr is None:
             raise ValueError(f"Tidak dapat membaca citra dari path: {image_path}")
 
         img_h, img_w = image_bgr.shape[:2]
-        is_ready = self.ensure_model_loaded()
+        is_ready = self.ensure_model_loaded(key)
+        model = self._models.get(key)
+        class_mapping = self._mappings.get(key, self._class_mapping)
 
         detections: List[BoundingBoxItem] = []
         fire_detected = False
         smoke_detected = False
         highest_conf = 0.0
-        model_info = "Model belum tersedia (Mode Fallback)"
+        model_info = f"{spec.label}: model belum tersedia (Mode Fallback)"
 
         if is_ready:
             if self._custom_predictor is not None:
@@ -322,7 +419,7 @@ class AIDetectionService:
                 for item in raw_preds:
                     cid = int(item["class_id"])
                     cname = normalize_class_label(
-                        item.get("class_name") or self._class_mapping.get(cid, f"Class_{cid}")
+                        item.get("class_name") or class_mapping.get(cid, f"Class_{cid}")
                     )
                     conf = float(item["confidence"])
                     if conf < threshold:
@@ -343,9 +440,9 @@ class AIDetectionService:
                             bbox_xywhn=[round(xc, 4), round(yc, 4), round(wn, 4), round(hn, 4)],
                         )
                     )
-            elif self._model is not None:
+            elif model is not None:
                 try:
-                    results = self._model.predict(
+                    results = model.predict(
                         source=str(image_path),
                         conf=threshold,
                         iou=self.iou_threshold,
@@ -353,7 +450,7 @@ class AIDetectionService:
                         device=self._device,
                         verbose=False,
                     )
-                    model_info = f"Ultralytics YOLO ({self.model_path.name} @ {self._device})"
+                    model_info = f"{spec.label} ({spec.path.name} @ {self._device})"
                     if results and len(results) > 0:
                         res = results[0]
                         boxes = getattr(res, "boxes", None)
@@ -365,7 +462,7 @@ class AIDetectionService:
                             for i in range(len(xyxy_arr)):
                                 cid = int(cls_arr[i])
                                 conf = float(conf_arr[i])
-                                cname = self._class_mapping.get(cid, f"Class_{cid}")
+                                cname = class_mapping.get(cid, f"Class_{cid}")
                                 cname = normalize_class_label(cname)
                                 x1, y1, x2, y2 = [float(v) for v in xyxy_arr[i]]
                                 xc, yc, wn, hn = [float(v) for v in xywhn_arr[i]]
@@ -421,6 +518,7 @@ class AIDetectionService:
             inference_time_ms=elapsed_ms,
             image_dimensions=[img_w, img_h],
             model_info=model_info,
+            model_key=key,
             disclaimer=AI_DISCLAIMER_TEXT,
         )
 

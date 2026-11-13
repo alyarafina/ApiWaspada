@@ -76,10 +76,47 @@ document.addEventListener("DOMContentLoaded", function () {
     formAlert.classList.add("hidden");
   }
 
+  // Pemilih model AI (YOLOv8 Nano / Medium / Large / kustom)
+  const aiModelGroup = document.getElementById("aiModelGroup");
+  const aiModelSelect = document.getElementById("aiModelSelect");
+  const aiModelHint = document.getElementById("aiModelHint");
+  const resModelInfo = document.getElementById("resModelInfo");
+  let modelOptions = [];
+
+  function renderModelOptions(status) {
+    modelOptions = (status.available_models || []).filter((m) => m.available);
+    if (modelOptions.length === 0) {
+      aiModelGroup.classList.add("hidden");
+      return;
+    }
+    aiModelSelect.innerHTML = modelOptions
+      .map(
+        (m) =>
+          `<option value="${escapeHtml(m.key)}"${m.key === status.default_model ? " selected" : ""}>` +
+          `${escapeHtml(m.label)}${m.is_default ? " (default)" : ""}</option>`
+      )
+      .join("");
+    updateModelHint();
+    aiModelGroup.classList.remove("hidden");
+  }
+
+  function updateModelHint() {
+    const m = modelOptions.find((o) => o.key === aiModelSelect.value);
+    aiModelHint.textContent = m ? m.description : "";
+  }
+  aiModelSelect.addEventListener("change", updateModelHint);
+
+  function appendSelectedModel(formData) {
+    if (!aiModelGroup.classList.contains("hidden") && aiModelSelect.value) {
+      formData.append("model", aiModelSelect.value);
+    }
+  }
+
   // 1. Periksa Status Model AI YOLO di Backend
   async function checkAiModelStatus() {
     try {
       const status = await apiFetch("/api/detect/status");
+      renderModelOptions(status);
       if (status.ai_available) {
         aiStatusBanner.className = "alert alert-success";
         aiStatusBanner.innerHTML =
@@ -292,6 +329,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const confPct = (Number(detData.highest_confidence ?? detData.detection_confidence ?? 0) * 100).toFixed(1);
     resConfidenceVal.textContent = `${confPct}%`;
     resInferenceTime.textContent = `${Number(detData.inference_time_ms || 0).toFixed(1)} ms`;
+    const modelText = detData.model_info || detData.ai_model_used || "";
+    resModelInfo.textContent = modelText ? `Model: ${modelText}` : "";
 
     const boxes = detData.detections || [];
     if (boxes.length === 0) {
@@ -334,6 +373,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const formData = new FormData();
       formData.append("image", selectedImageFile);
+      appendSelectedModel(formData);
       const res = await apiFetch("/api/detect", {
         method: "POST",
         body: formData,
@@ -383,6 +423,7 @@ document.addEventListener("DOMContentLoaded", function () {
       formData.append("latitude", String(lat));
       formData.append("longitude", String(lng));
       formData.append("reporter_name", reporterNameInput.value.trim() || "Masyarakat");
+      appendSelectedModel(formData);
 
       const created = await apiFetch("/api/reports", {
         method: "POST",

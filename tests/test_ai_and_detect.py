@@ -161,6 +161,46 @@ class TestAIDetectionAndImageValidation(unittest.TestCase):
         )
         self.assertEqual(r_corrupt.status_code, 400)
 
+    def test_06_status_lists_selectable_models(self) -> None:
+        """Status harus memuat daftar model fire_n, fire_m, fire_l, best beserta model default."""
+        data = self.client.get("/api/detect/status").json()
+        keys = [m["key"] for m in data["available_models"]]
+        for key in ("fire_n", "fire_m", "fire_l", "best"):
+            self.assertIn(key, keys)
+        self.assertIn(data["default_model"], keys)
+        self.assertEqual(sum(1 for m in data["available_models"] if m["is_default"]), 1)
+
+    def test_07_unknown_model_rejected(self) -> None:
+        """Kunci model yang tidak terdaftar harus ditolak dengan HTTP 400."""
+        resp = self.client.post(
+            "/api/detect",
+            files={"image": ("uji.jpg", create_test_image_bytes("JPEG"), "image/jpeg")},
+            data={"model": "yolov99"},
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    def test_08_each_available_model_runs_inference(self) -> None:
+        """Setiap model yang filenya tersedia harus dapat dipilih dan menjalankan inferensi nyata."""
+        ai_service.set_custom_predictor(None)
+        img_bytes = create_test_image_bytes("JPEG")
+        ran = 0
+        for key in ("fire_n", "fire_m", "fire_l"):
+            if not ai_service.model_file_exists(key):
+                continue
+            resp = self.client.post(
+                "/api/detect",
+                files={"image": (f"uji_{key}.jpg", img_bytes, "image/jpeg")},
+                data={"model": key},
+            )
+            self.assertEqual(resp.status_code, 200)
+            data = resp.json()
+            self.assertTrue(data["ai_available"], data["model_info"])
+            self.assertEqual(data["model_key"], key)
+            self.assertIn(f"{key}.pt", data["model_info"])
+            ran += 1
+        if ran == 0:
+            self.skipTest("File model fire_*.pt belum ada di ml/weights/")
+
 
 if __name__ == "__main__":
     unittest.main()

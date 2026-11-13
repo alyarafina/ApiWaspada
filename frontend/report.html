@@ -98,6 +98,12 @@
               <button type="button" id="btnPreviewAi" class="btn btn-outline-orange"><i data-icon="sparkles"></i> Cek foto dengan AI</button>
             </div>
 
+            <div id="aiModelGroup" class="form-group ai-model-group hidden">
+              <label for="aiModelSelect" class="form-label">Model AI</label>
+              <select id="aiModelSelect" class="form-control"></select>
+              <div id="aiModelHint" class="form-hint"></div>
+            </div>
+
             <div id="cameraContainer" class="hidden camera-container">
               <video id="cameraVideo" autoplay playsinline muted></video>
               <canvas id="cameraCanvas" class="hidden"></canvas>
@@ -206,6 +212,7 @@
             <div id="resInferenceTime" class="metric-value">0.0 ms</div>
           </div>
         </div>
+        <p id="resModelInfo" class="form-hint res-model-info"></p>
 
         <div class="grid-2 detection-images">
           <div>

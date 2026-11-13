@@ -130,6 +130,9 @@ class Settings:
         )
         self.YOLO_IMAGE_SIZE: int = int(os.getenv("YOLO_IMAGE_SIZE", "640"))
         self.YOLO_DEVICE: str = os.getenv("YOLO_DEVICE", "auto")
+        # Model default yang dipakai bila pengguna tidak memilih model:
+        # fire_n | fire_m | fire_l | best
+        self.YOLO_DEFAULT_MODEL: str = os.getenv("YOLO_DEFAULT_MODEL", "fire_m").strip().lower()
 
         # Pemetaan kelas default D-Fire Dataset (0: smoke, 1: fire)
         class_map_raw = os.getenv("YOLO_CLASS_MAP", "0:smoke,1:fire")
