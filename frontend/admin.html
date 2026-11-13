@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#F6F4F3" />
+  <meta name="robots" content="noindex" />
+  <title>Kelola dan Rekap | Admin ApiWaspada</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+  <link rel="stylesheet" href="/assets/css/ui-baru.css?v=20261113m" />
+</head>
+<body data-area="officer" data-page="admin">
+  <a class="skip-link" href="#konten">Lewati ke konten utama</a>
+  <script src="/assets/js/layout.js?v=20261113k"></script>
+
+  <main id="konten" tabindex="-1">
+    <div class="container">
+      <header class="dash-head">
+        <div>
+          <h1>Kelola dan rekap</h1>
+          <p>Akun petugas dan rekapitulasi laporan Kota Jambi.</p>
+        </div>
+        <nav class="admin-jump" aria-label="Bagian halaman admin">
+          <a href="#rekap">Rekap</a><a href="#akun">Akun</a>
+        </nav>
+      </header>
+      <div id="adminAlert" class="alert hidden" role="status"></div>
+
+      <!-- REKAP -->
+      <section id="rekap" class="admin-section" aria-labelledby="rekapTitle">
+        <div class="admin-section-head">
+          <h2 id="rekapTitle">Rekapitulasi</h2>
+          <button type="button" id="btnCsv" class="btn btn-secondary btn-sm"><i data-icon="file"></i> Unduh CSV</button>
+        </div>
+        <div class="kpi-grid" id="recapKpi"></div>
+        <div class="card">
+          <h3 class="card-title">Laporan per bulan</h3>
+          <ul class="month-bars" id="recapMonths"></ul>
+        </div>
+      </section>
+
+      <!-- AKUN -->
+      <section id="akun" class="admin-section" aria-labelledby="akunTitle">
+        <div class="admin-section-head"><h2 id="akunTitle">Akun petugas</h2></div>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="card-title">Buat akun</h3>
+            <form id="officerForm" novalidate style="margin-top:.8rem">
+              <div class="form-group"><label class="form-label" for="ofName">Nama lengkap <span class="required">*</span></label>
+                <input id="ofName" class="form-control" required maxlength="120" /></div>
+              <div class="form-group"><label class="form-label" for="ofUser">Username <span class="required">*</span></label>
+                <input id="ofUser" class="form-control" required maxlength="64" pattern="[a-zA-Z0-9_.\-]+" autocomplete="off" />
+                <div class="form-hint">Huruf, angka, titik, garis bawah.</div></div>
+              <div class="form-group"><label class="form-label" for="ofPass">Password awal <span class="required">*</span></label>
+                <input id="ofPass" class="form-control" type="password" required minlength="8" autocomplete="new-password" />
+                <div class="form-hint">Minimal 8 karakter. Minta petugas menggantinya setelah login pertama.</div></div>
+              <div class="form-group"><label class="form-label" for="ofRole">Peran <span class="required">*</span></label>
+                <select id="ofRole" class="form-control">
+                  <option value="operator">Operator JCOC 112</option>
+                  <option value="damkar">Petugas Damkar</option>
+                  <option value="admin">Admin sistem</option>
+                </select></div>
+              <button type="submit" class="btn btn-primary"><i data-icon="plus"></i> Buat akun</button>
+            </form>
+          </div>
+          <div class="card">
+            <h3 class="card-title">Daftar akun</h3>
+            <ul class="admin-list" id="officerList" style="margin-top:.8rem"></ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261113k"></script>
+  <script src="/assets/js/auth.js?v=20261113k"></script>
+  <script src="/assets/js/admin.js?v=20261113k"></script>
+</body>
+</html>

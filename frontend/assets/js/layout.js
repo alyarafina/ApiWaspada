@@ -63,18 +63,11 @@
     return `<svg class="ic ${cls || ""}" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
   }
 
-  const BRAND_MARK = `
-    <svg class="brand-mark" width="38" height="38" viewBox="0 0 48 48" aria-hidden="true">
-      <defs><linearGradient id="awg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#B91C1C"/><stop offset=".55" stop-color="#DC2626"/><stop offset="1" stop-color="#F97316"/></linearGradient>
-      <linearGradient id="awi" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#F97316"/><stop offset="1" stop-color="#FACC15"/></linearGradient></defs>
-      <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#awg)"/>
-      <path d="M24 8c-4.5 6.5-11 11-11 19.2C13 33.4 17.9 38.5 24 38.5S35 33.4 35 27.2c0-4.9-2.8-9.1-5.6-12-.3 3.1-2.2 5-3.9 5.9C26.8 16.8 26.2 11.8 24 8Z" fill="#fff"/>
-      <path d="M24 20.5c-2.5 3.3-4.8 5.7-4.8 9 0 2.7 2.1 5 4.8 5s4.8-2.3 4.8-5c0-3-2.3-5.4-4.8-9Z" fill="url(#awi)"/>
-    </svg>`;
+  const BRAND_MARK = `<img class="brand-mark" src="/assets/images/logo-apiwaspada-96.png" width="28" height="40" alt="" />`;
 
   function brand(href, tag) {
     return `
-      <a href="${href}" class="brand" aria-label="ApiWaspada — ke halaman utama">
+      <a href="${href}" class="brand">
         ${BRAND_MARK}
         <span class="brand-text">
           <span class="brand-name">Api<span>Waspada</span>${tag ? `<span class="brand-tag">${tag}</span>` : ""}</span>
@@ -89,6 +82,13 @@
     { key: "tracking", href: "/tracking.html", label: "Lacak", long: "Lacak Laporan", icon: "search" },
     { key: "map", href: "/peta.html", label: "Peta", long: "Peta Laporan", icon: "map" },
     { key: "guide", href: "/panduan.html", label: "Panduan", icon: "book" },
+  ];
+
+  const DAMKAR_NAV = [
+    { key: "damkar", href: "/damkar.html", label: "Tugas", long: "Tugas Damkar", icon: "flame" },
+  ];
+  const ADMIN_EXTRA = [
+    { key: "admin", href: "/admin.html", label: "Admin", long: "Kelola & Rekap", icon: "grid" },
   ];
 
   const OFFICER_NAV = [
@@ -129,18 +129,26 @@
   if (area === "gate") {
     headerHtml = "";
   } else if (area === "officer") {
+    let role = "operator";
+    try {
+      const prof = JSON.parse(localStorage.getItem("apiwaspada_officer_profile") || "null");
+      if (prof && prof.role) role = prof.role;
+    } catch (e) { /* abaikan */ }
+    const officerItems = role === "damkar" ? DAMKAR_NAV : role === "admin" ? ADMIN_EXTRA.concat(OFFICER_NAV) : OFFICER_NAV;
+    const homeHref = role === "damkar" ? "/damkar.html" : role === "admin" ? "/admin.html" : "/dashboard.html";
+    const tagLabel = role === "damkar" ? "Damkar" : role === "admin" ? "Admin" : "Operator";
     headerHtml = `
       <header class="site-header">
         <div class="container">
-          ${brand("/dashboard.html", "Petugas")}
-          <nav class="main-nav" aria-label="Navigasi petugas">${navLinks(OFFICER_NAV)}</nav>
+          ${brand(homeHref, tagLabel)}
+          <nav class="main-nav" aria-label="Navigasi petugas">${navLinks(officerItems)}</nav>
           <div class="header-actions">
             <span class="officer-chip"><span class="avatar" id="officerAvatar">P</span><span class="name" id="officerNameBadge">Petugas</span></span>
             <button type="button" class="btn btn-secondary btn-sm" data-logout>${icon("logout")}<span>Keluar</span></button>
           </div>
         </div>
       </header>`;
-    tabbarHtml = `<nav class="tabbar" aria-label="Navigasi petugas">${tabLinks(OFFICER_NAV)}<a href="/beranda.html">${icon("users")}<span>Publik</span></a></nav>`;
+    tabbarHtml = `<nav class="tabbar" aria-label="Navigasi petugas">${tabLinks(officerItems)}<a href="/beranda.html">${icon("users")}<span>Publik</span></a></nav>`;
   } else if (page === "login") {
     headerHtml = `
       <header class="site-header">
@@ -158,10 +166,10 @@
           ${brand("/beranda.html")}
           <nav class="main-nav" aria-label="Navigasi utama">${navLinks(PUBLIC_NAV)}</nav>
           <div class="header-actions">
-            <a href="/login.html" class="officer-link" aria-label="Masuk sebagai petugas" title="Masuk sebagai petugas">
-              ${icon("shield")}<span>Petugas</span>
+            <a href="/login.html" class="officer-link" title="Masuk sebagai petugas">
+              ${icon("shield")}<span class="officer-label">Petugas</span>
             </a>
-            <a href="tel:113" class="emergency-pill" aria-label="Telepon Pemadam Kebakaran 113">
+            <a href="tel:113" class="emergency-pill" title="Telepon pemadam kebakaran 113">
               <span class="dot">${icon("phone")}</span><span><span class="label-long">Darurat </span>113</span>
             </a>
           </div>
@@ -185,8 +193,8 @@
         <footer class="site-footer" style="margin-top:2rem">
           <div class="container" style="padding-top:1.25rem;padding-bottom:1.25rem">
             <div class="footer-bottom" style="border:0;margin:0;padding:0">
-              <span>&copy; 2026 ApiWaspada Kota Jambi &middot; Portal Verifikasi Petugas</span>
-              <span>Hasil AI adalah indikasi awal &mdash; keputusan akhir di tangan petugas.</span>
+              <span>&copy; 2026 ApiWaspada Kota Jambi. Portal verifikasi petugas.</span>
+              <span>Hasil AI adalah indikasi awal. Keputusan akhir di tangan petugas.</span>
             </div>
           </div>
         </footer>`;
@@ -197,7 +205,7 @@
           <div class="footer-grid">
             <div>
               ${brand("/beranda.html")}
-              <p class="footer-about">Lapor kebakaran di Kota Jambi, cepat &amp; mudah.</p>
+              <p class="footer-about">Setiap laporan warga menjadi satu titik di peta Kota Jambi, diperiksa AI lalu diverifikasi petugas.</p>
             </div>
             <div>
               <h4>Menu</h4>
@@ -221,7 +229,7 @@
           </div>
           <div class="footer-bottom">
             <span>&copy; 2026 ApiWaspada Kota Jambi</span>
-            <span>Darurat? Telepon 113.</span>
+            <span>Pusat pantau: <span class="mono">-1.6101, 103.6131</span></span>
           </div>
         </div>
       </footer>`;
@@ -306,6 +314,8 @@
       body.classList.add("has-tabbar");
     }
     const main = document.querySelector("main");
+    if (main && !main.id) main.id = "konten";
+    if (main && !main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
     if (main) main.insertAdjacentHTML("afterend", footerHtml());
     else body.insertAdjacentHTML("beforeend", footerHtml());
 

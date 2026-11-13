@@ -39,6 +39,7 @@ function getStatusBadgeHtml(status) {
   const map = {
     pending: { cls: "badge-pending", label: "Menunggu Verifikasi" },
     verified: { cls: "badge-verified", label: "Terverifikasi" },
+    handling: { cls: "badge-handling", label: "Ditangani Tim Damkar" },
     rejected: { cls: "badge-rejected", label: "Ditolak" },
     completed: { cls: "badge-completed", label: "Selesai Ditangani" },
   };
@@ -114,7 +115,25 @@ async function apiFetch(endpoint, options = {}) {
   return data;
 }
 
+/** Halaman awal sesuai peran akun. */
+function roleHome(role) {
+  const r = String(role || "operator").toLowerCase();
+  if (r === "admin") return "/admin.html";
+  if (r === "damkar") return "/damkar.html";
+  return "/dashboard.html";
+}
+
+function getOfficerProfile() {
+  try {
+    return JSON.parse(localStorage.getItem(window.APIWASPADA_CONFIG.OFFICER_STORAGE_KEY) || "null");
+  } catch (e) {
+    return null;
+  }
+}
+
 window.ApiWaspadaUtils = {
+  roleHome,
+  getOfficerProfile,
   escapeHtml,
   formatDateTimeWIB,
   getStatusBadgeHtml,

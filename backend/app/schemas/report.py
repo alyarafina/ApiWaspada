@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from backend.app.schemas.detection import AI_DISCLAIMER_TEXT, BoundingBoxItem
 
-VALID_REPORT_STATUSES = ("pending", "verified", "rejected", "completed")
+VALID_REPORT_STATUSES = ("pending", "verified", "handling", "rejected", "completed")
 
 
 class ReportHistoryItem(BaseModel):
@@ -27,7 +27,7 @@ class ReportStatusUpdateRequest(BaseModel):
 
     status: str = Field(
         ...,
-        description="Status baru laporan: pending, verified, rejected, atau completed",
+        description="Status baru laporan: pending, verified, handling, rejected, atau completed",
     )
     note: str = Field(
         ...,
@@ -35,6 +35,17 @@ class ReportStatusUpdateRequest(BaseModel):
         max_length=1000,
         description="Catatan verifikasi petugas (wajib diisi, minimal 3 karakter)",
     )
+
+
+class ProgressItem(BaseModel):
+    """Satu tahapan penanganan lapangan oleh Petugas Damkar (tampil juga ke warga)."""
+
+    id: int
+    stage: str
+    stage_label: str
+    note: str = ""
+    photo_url: Optional[str] = None
+    created_at: datetime
 
 
 class ReportPublicResponse(BaseModel):
@@ -60,6 +71,7 @@ class ReportPublicResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     region_info: Dict[str, Any] = Field(default_factory=dict)
+    progress: List[ProgressItem] = Field(default_factory=list)
     disclaimer: str = Field(default=AI_DISCLAIMER_TEXT)
 
 
@@ -72,6 +84,9 @@ class ReportOfficerResponse(ReportPublicResponse):
     reporter_name: Optional[str] = "Masyarakat"
     ai_model_used: Optional[str] = "none"
     histories: List[ReportHistoryItem] = Field(default_factory=list)
+    assigned_officers: List[Dict[str, Any]] = Field(
+        default_factory=list, description="Petugas Damkar yang ditugaskan (id, username, full_name)"
+    )
 
 
 class ReportListResponse(BaseModel):

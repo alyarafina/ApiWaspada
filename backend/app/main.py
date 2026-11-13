@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.app.config import settings
 from backend.app.database import SessionLocal, init_db
-from backend.app.routes import auth, dashboard, detect, health, reports
+from backend.app.routes import auth, dashboard, damkar, detect, health, reports, ops
 from backend.app.services.auth_service import ensure_default_officer
 
 app = FastAPI(
@@ -59,6 +59,8 @@ app.include_router(auth.router)
 app.include_router(detect.router)
 app.include_router(reports.router)
 app.include_router(dashboard.router)
+app.include_router(ops.router)
+app.include_router(damkar.router)
 
 # Mount folder penyimpanan gambar (uploads & results)
 app.mount(
@@ -93,6 +95,8 @@ ALLOWED_HTML_PAGES = {
     "panduan.html",
     "dashboard-peta.html",
     "dashboard-laporan.html",
+    "admin.html",
+    "damkar.html",
 }
 
 
@@ -135,6 +139,24 @@ def root_endpoint(request: Request) -> Any:
     )
 
 
+@app.get("/robots.txt", include_in_schema=False)
+def robots_txt() -> Any:
+    """Halaman publik boleh diindeks; dashboard petugas dan API tidak."""
+    from fastapi.responses import PlainTextResponse
+
+    return PlainTextResponse(
+        "User-agent: *\n"
+        "Disallow: /api/\n"
+        "Disallow: /dashboard.html\n"
+        "Disallow: /dashboard-laporan.html\n"
+        "Disallow: /dashboard-peta.html\n"
+        "Disallow: /report-detail.html\n"
+        "Disallow: /admin.html\n"
+        "Disallow: /damkar.html\n"
+        "Disallow: /storage/\n"
+    )
+
+
 @app.get("/{page_name}", include_in_schema=False)
 def serve_frontend_page(page_name: str) -> Any:
     """Menyajikan file halaman HTML frontend secara aman (tanpa risiko path traversal)."""
@@ -143,6 +165,9 @@ def serve_frontend_page(page_name: str) -> Any:
         target = (settings.FRONTEND_DIR / clean_name).resolve()
         if target.exists() and settings.FRONTEND_DIR in target.parents:
             return FileResponse(str(target), media_type="text/html", headers={"Cache-Control": "no-cache"})
+    not_found_page = settings.FRONTEND_DIR / "404.html"
+    if not_found_page.exists():
+        return FileResponse(str(not_found_page), status_code=404, media_type="text/html", headers={"Cache-Control": "no-cache"})
     return JSONResponse(
         status_code=404,
         content={"detail": f"Halaman '{clean_name}' tidak ditemukan."},

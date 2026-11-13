@@ -2,8 +2,12 @@
  * Logika Autentikasi Petugas Dashboard (`login.html` dan proteksi halaman petugas).
  */
 
-async function verifyOfficerSessionOrRedirect() {
-  const { apiFetch, getOfficerToken, clearOfficerSession } = window.ApiWaspadaUtils;
+/**
+ * Pastikan sesi valid. `allowedRoles` (opsional) membatasi halaman ke peran tertentu;
+ * peran lain diarahkan ke halaman awal perannya sendiri.
+ */
+async function verifyOfficerSessionOrRedirect(allowedRoles) {
+  const { apiFetch, getOfficerToken, clearOfficerSession, setOfficerSession, roleHome } = window.ApiWaspadaUtils;
   const token = getOfficerToken();
   if (!token) {
     window.location.href = "/login.html?reason=unauthorized";
@@ -11,6 +15,18 @@ async function verifyOfficerSessionOrRedirect() {
   }
   try {
     const profile = await apiFetch("/api/auth/me");
+    setOfficerSession(token, profile);
+    const allowed = allowedRoles || ["operator", "admin"];
+    if (!["operator", "admin", "damkar"].includes(profile.role)) {
+      // Peran yang tidak lagi didukung: keluar agar tidak terjadi pengalihan berulang
+      clearOfficerSession();
+      window.location.href = "/login.html?reason=unauthorized";
+      return null;
+    }
+    if (!allowed.includes(profile.role)) {
+      window.location.href = roleHome(profile.role);
+      return null;
+    }
     return profile;
   } catch (err) {
     clearOfficerSession();
@@ -81,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
         body: JSON.stringify({ username, password }),
       });
       setOfficerSession(res.access_token, res.officer);
-      window.location.href = "/dashboard.html";
+      window.location.href = window.ApiWaspadaUtils.roleHome(res.officer && res.officer.role);
     } catch (err) {
       loginAlert.className = "alert alert-error";
       loginAlert.innerHTML = escapeHtml(err.message || "Gagal login. Periksa kembali username dan password Anda.");

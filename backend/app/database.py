@@ -45,11 +45,13 @@ except ImportError:
 
     USING_NATIVE_SQLALCHEMY = False
 
-# Buat engine SQLite dengan check_same_thread=False untuk FastAPI
-engine = create_engine(
-    settings.DATABASE_URL,
-    connect_args={"check_same_thread": False},
-)
+# SQLite butuh check_same_thread=False untuk FastAPI; PostgreSQL (Supabase) tidak.
+# pool_pre_ping menghindari error koneksi basi dari pooler Supabase.
+_is_sqlite = settings.DATABASE_URL.startswith("sqlite")
+_engine_kwargs = {"connect_args": {"check_same_thread": False} if _is_sqlite else {}}
+if USING_NATIVE_SQLALCHEMY:
+    _engine_kwargs["pool_pre_ping"] = True
+engine = create_engine(settings.DATABASE_URL, **_engine_kwargs)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -68,9 +70,16 @@ def get_db() -> Generator[Session, None, None]:
 def init_db() -> None:
     """Inisialisasi seluruh tabel database SQLite."""
     # Import semua model agar terdaftar pada Base.metadata
-    from backend.app.models import report, report_history, user  # noqa: F401
+    from backend.app.models import assignment, progress, report, report_history, user  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
+    if USING_NATIVE_SQLALCHEMY and engine.dialect.name == "postgresql":
+        # Supabase: tabel tambahan tidak boleh terbuka lewat REST API publik (anon key)
+        from sqlalchemy import text
+
+        with engine.begin() as conn:
+            for table in ("report_progress", "report_assignments"):
+                conn.execute(text(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY"))
 
 
 __all__ = [

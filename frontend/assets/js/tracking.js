@@ -23,7 +23,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const STATUS_TEXT = {
     pending: { icon: "hourglass", text: "<strong>Menunggu dicek petugas.</strong> Cek lagi nanti." },
-    verified: { icon: "shield", text: "<strong>Sedang ditangani petugas.</strong>" },
+    verified: { icon: "shield", text: "<strong>Laporan terverifikasi.</strong> Tim Damkar sedang disiapkan." },
+    handling: { icon: "flame", text: "<strong>Tim Damkar sedang menangani.</strong> Jauhi area kebakaran." },
     completed: { icon: "check-circle", text: "<strong>Selesai ditangani.</strong> Terima kasih!" },
     rejected: { icon: "ban", text: "<strong>Laporan ditolak.</strong> Lihat catatan di riwayat." },
   };
@@ -63,11 +64,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const states = {
       pending: [["done"], ["current"], []],
       verified: [["done"], ["done"], ["current"]],
+      handling: [["done"], ["done"], ["current"]],
       completed: [["done"], ["done"], ["done"]],
       rejected: [["done"], ["rejected"], []],
     }[s] || [["done"], ["current"], []];
     states.forEach((cls, i) => cls.forEach((c) => steps[i].classList.add(c)));
-    fill.style.width = s === "verified" ? "33.33%" : s === "completed" ? "66.66%" : "0%";
+    fill.style.width = s === "verified" || s === "handling" ? "33.33%" : s === "completed" ? "66.66%" : "0%";
 
     const info = STATUS_TEXT[s] || STATUS_TEXT.pending;
     const explain = $("trkStatusExplain");
@@ -88,17 +90,22 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => miniMap.invalidateSize(), 200);
   }
 
-  async function lookupReport(identifier) {
+  let liveCode = null;
+  let liveStatus = null;
+
+  async function lookupReport(identifier, silent) {
     const cleanId = String(identifier || "").trim().replace(/^#/, "");
     if (!cleanId) {
       showAlert("Masukkan kode pelacakan (contoh: AW-20261111-XXXXXX) atau ID laporan.");
       return;
     }
-    alertBox.classList.add("hidden");
+    if (!silent) alertBox.classList.add("hidden");
 
     const orig = btnSearch.innerHTML;
-    btnSearch.disabled = true;
-    btnSearch.innerHTML = `<span class="loading-spinner"></span> Mencari...`;
+    if (!silent) {
+      btnSearch.disabled = true;
+      btnSearch.innerHTML = `<span class="loading-spinner"></span> Mencari...`;
+    }
 
     try {
       const report = await apiFetch(`/api/reports/${encodeURIComponent(cleanId)}`);
@@ -122,6 +129,9 @@ document.addEventListener("DOMContentLoaded", function () {
       $("trkResultImg").src = resolveMediaUrl(report.result_image_url || report.image_url);
 
       renderTracker(report.status);
+      if (window.AWProgress) window.AWProgress.renderProgressTimeline($("trkProgress"), report);
+      liveCode = report.tracking_code;
+      liveStatus = report.status;
 
       const list = $("trkHistoryList");
       if (!histories || histories.length === 0) {
@@ -148,8 +158,9 @@ document.addEventListener("DOMContentLoaded", function () {
       url.searchParams.delete("id");
       window.history.replaceState(null, "", url.toString());
 
-      resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (!silent) resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (err) {
+      if (silent) return;
       resultBox.classList.add("hidden");
       if (helpBox) helpBox.classList.remove("hidden");
       const msg = err && err.status === 404
@@ -157,8 +168,10 @@ document.addEventListener("DOMContentLoaded", function () {
         : (err && err.message) || "Laporan tidak ditemukan.";
       showAlert(msg);
     } finally {
-      btnSearch.disabled = false;
-      btnSearch.innerHTML = orig;
+      if (!silent) {
+        btnSearch.disabled = false;
+        btnSearch.innerHTML = orig;
+      }
     }
   }
 
@@ -175,5 +188,12 @@ document.addEventListener("DOMContentLoaded", function () {
     input.value = initial;
     lookupReport(initial);
   }
+
+  // UC-03: status diperbarui otomatis selama laporan belum selesai
+  setInterval(() => {
+    if (liveCode && !document.hidden && !["completed", "rejected"].includes(liveStatus)) {
+      lookupReport(liveCode, true);
+    }
+  }, 30000);
 
 });

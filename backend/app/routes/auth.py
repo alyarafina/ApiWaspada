@@ -44,14 +44,13 @@ def login_officer(
     response_model=OfficerProfileResponse,
     summary="Ambil informasi profil petugas yang sedang aktif login",
 )
-def get_me(current_officer: Officer = Depends(get_current_officer)) -> OfficerProfileResponse:
+def get_me(
+    current_officer: Officer = Depends(get_current_officer), db: Session = Depends(get_db)
+) -> OfficerProfileResponse:
     """Mengembalikan informasi akun petugas berdasarkan token autentikasi yang valid."""
-    return OfficerProfileResponse(
-        id=current_officer.id,
-        username=current_officer.username,
-        full_name=current_officer.full_name,
-        role=current_officer.role,
-    )
+    from backend.app.services.auth_service import build_profile
+
+    return build_profile(db, current_officer)
 
 
 @router.post(

@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const map = L.map("publicDistributionMap").setView([cfg.DEFAULT_LAT, cfg.DEFAULT_LNG], cfg.DEFAULT_ZOOM);
   window.ApiWaspadaMap.initBaseTileLayers(map);
+  window.ApiWaspadaMap.lockToJambi(map);
   const group = L.layerGroup().addTo(map);
 
   let currentStatus = "";

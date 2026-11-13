@@ -3,20 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0F172A" />
+  <meta name="theme-color" content="#F6F4F3" />
   <meta name="robots" content="noindex" />
-  <title>Verifikasi Laporan — Dashboard Petugas ApiWaspada</title>
-  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <title>Verifikasi Laporan | Dashboard Petugas ApiWaspada</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://a.tile.openstreetmap.org" crossorigin />
+  <link rel="preconnect" href="https://b.tile.openstreetmap.org" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+  <link rel="stylesheet" href="/assets/css/ui-baru.css?v=20261113m" />
 </head>
 <body data-area="officer" data-page="dash-detail">
-  <script src="/assets/js/layout.js?v=20261112q"></script>
+  <a class="skip-link" href="#konten">Lewati ke konten utama</a>
+  <script src="/assets/js/layout.js?v=20261113k"></script>
 
-  <main>
+  <main id="konten" tabindex="-1">
     <div class="container">
       <nav class="breadcrumb" aria-label="Breadcrumb" style="padding-top:1.25rem">
         <a href="/dashboard.html">Dashboard</a><i data-icon="chevron-right"></i>
@@ -95,7 +100,7 @@
                 <label for="newStatusSelect" class="sr-only">Status laporan</label>
                 <select id="newStatusSelect" class="form-control sr-only" required tabindex="-1">
                   <option value="pending">Menunggu verifikasi</option>
-                  <option value="verified">Terverifikasi &mdash; tindak lanjuti</option>
+                  <option value="verified">Terverifikasi: tindak lanjuti</option>
                   <option value="rejected">Ditolak / tidak valid</option>
                   <option value="completed">Selesai ditangani</option>
                 </select>
@@ -109,6 +114,34 @@
             </form>
           </section>
 
+          <section class="card" id="assignCard">
+            <h2 class="card-title"><i data-icon="send"></i> Tugaskan Tim Damkar</h2>
+            <p class="card-sub" id="assignInfo" style="margin-bottom:1rem">Memuat&hellip;</p>
+            <form id="assignForm" class="hidden" novalidate>
+              <div class="assign-tools">
+                <span class="form-label" style="margin:0">Petugas Damkar</span>
+                <button type="button" id="btnSelectAllOfficers" class="btn btn-secondary btn-sm">Pilih semua petugas</button>
+              </div>
+              <fieldset class="pick-options" id="assignList">
+                <legend class="sr-only">Pilih petugas Damkar</legend>
+              </fieldset>
+              <div class="form-group" style="margin-top:.9rem">
+                <label for="assignNote" class="form-label">Pesan untuk petugas <span class="opt">(opsional)</span></label>
+                <textarea id="assignNote" class="form-control" rows="2" maxlength="500" placeholder="Contoh: akses lewat gang di samping masjid."></textarea>
+              </div>
+              <div class="assign-actions">
+                <button type="submit" id="btnAssignSelected" class="btn btn-primary btn-lg"><i data-icon="send"></i> Kirim ke petugas terpilih</button>
+                <button type="button" id="btnAssignAll" class="btn btn-dark btn-lg">Kirim ke semua petugas</button>
+              </div>
+            </form>
+            <div id="assignAlert" class="alert hidden" style="margin:1rem 0 0" role="status"></div>
+          </section>
+
+          <section class="card">
+            <h2 class="card-title" style="margin-bottom:1rem"><i data-icon="flame"></i> Progres Tim Damkar</h2>
+            <div id="detProgressTimeline" class="timeline"></div>
+          </section>
+
           <section class="card">
             <h2 class="card-title" style="margin-bottom:1rem"><i data-icon="list"></i> Riwayat status</h2>
             <div id="detHistoryTimeline" class="timeline"></div>
@@ -120,9 +153,11 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="/assets/js/config.js?v=20261112q"></script>
-  <script src="/assets/js/utils.js?v=20261112q"></script>
-  <script src="/assets/js/map.js?v=20261112q"></script>
-  <script src="/assets/js/auth.js?v=20261112q"></script>
-  <script src="/assets/js/report-detail.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261113k"></script>
+  <script src="/assets/js/map.js?v=20261113k"></script>
+  <script src="/assets/js/auth.js?v=20261113k"></script>
+  <script src="/assets/js/progress-ui.js?v=20261113k"></script>
+  <script src="/assets/js/report-detail.js?v=20261113m"></script>
+  <script src="/assets/js/assign.js?v=20261113m"></script>
 </body>
 </html>

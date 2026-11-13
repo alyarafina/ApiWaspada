@@ -76,9 +76,14 @@ class Settings:
             o.strip() for o in origins_raw.split(",") if o.strip()
         ]
 
-        # Database SQLite
-        db_url_env = os.getenv("DATABASE_URL", "")
-        if db_url_env and db_url_env.startswith("sqlite:///"):
+        # Database (SQLite lokal atau PostgreSQL/Supabase)
+        db_url_env = os.getenv("DATABASE_URL", "").strip()
+        if db_url_env.startswith(("postgresql://", "postgres://")):
+            if db_url_env.startswith("postgres://"):
+                db_url_env = db_url_env.replace("postgres://", "postgresql://", 1)
+            self.DATABASE_URL: str = db_url_env
+            self.DATABASE_PATH: Path = Path("supabase")
+        elif db_url_env.startswith("sqlite:///"):
             rel_part = db_url_env.replace("sqlite:///", "")
             if rel_part.startswith("./") or not os.path.isabs(rel_part):
                 clean_rel = rel_part.lstrip("./")

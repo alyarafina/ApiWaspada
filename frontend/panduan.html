@@ -3,18 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#DC2626" />
-  <title>Panduan &amp; FAQ — ApiWaspada Kota Jambi</title>
-  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <meta name="theme-color" content="#F6F4F3" />
+  <meta name="description" content="Cara memotret api dan asap dengan aman, arti setiap status laporan, cara kerja pemeriksaan AI, dan jawaban pertanyaan umum ApiWaspada." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ApiWaspada" />
+  <meta property="og:title" content="Panduan dan FAQ | ApiWaspada Kota Jambi" />
+  <meta property="og:description" content="Cara memotret api dan asap dengan aman, arti setiap status laporan, cara kerja pemeriksaan AI, dan jawaban pertanyaan umum ApiWaspada." />
+  <meta property="og:image" content="/assets/images/og-apiwaspada.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>Panduan &amp; FAQ | ApiWaspada Kota Jambi</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
   <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+  <link rel="stylesheet" href="/assets/css/ui-baru.css?v=20261113m" />
 </head>
 <body data-area="public" data-page="guide">
-  <script src="/assets/js/layout.js?v=20261112q"></script>
+  <a class="skip-link" href="#konten">Lewati ke konten utama</a>
+  <script src="/assets/js/layout.js?v=20261113k"></script>
 
-  <main>
+  <main id="konten" tabindex="-1">
     <div class="container container-narrow">
       <header class="page-hero">
         <nav class="breadcrumb" aria-label="Breadcrumb"><a href="/beranda.html">Beranda</a><i data-icon="chevron-right"></i><span>Panduan</span></nav>
@@ -82,7 +94,7 @@
 
       <!-- TIPS FOTO -->
       <section class="guide-section" id="foto">
-        <h2><span class="icon-tile blue" style="margin:0;width:40px;height:40px"><i data-icon="camera"></i></span> Tips foto yang baik</h2>
+        <h2><span class="icon-tile" style="margin:0;width:40px;height:40px"><i data-icon="camera"></i></span> Tips foto yang baik</h2>
         <div class="grid-2">
           <div class="card"><h3 class="card-title" style="font-size:1rem"><i data-icon="image"></i> Tampilkan api / asap</h3><p class="card-sub">Terlihat jelas, tidak terlalu kecil.</p></div>
           <div class="card"><h3 class="card-title" style="font-size:1rem"><i data-icon="building"></i> Sertakan sekitar</h3><p class="card-sub">Bangunan atau jalan sekitar.</p></div>
@@ -93,12 +105,12 @@
 
       <!-- ARTI STATUS -->
       <section class="guide-section" id="status">
-        <h2><span class="icon-tile green" style="margin:0;width:40px;height:40px"><i data-icon="shield"></i></span> Arti status laporan</h2>
+        <h2><span class="icon-tile dark" style="margin:0;width:40px;height:40px"><i data-icon="shield"></i></span> Arti status laporan</h2>
         <div class="status-legend">
-          <div class="item"><span class="legend-marker" style="background:#F59E0B;margin-top:6px"></span><div><span class="badge badge-pending"><span class="badge-dot"></span>Menunggu Verifikasi</span><p>Belum dicek petugas.</p></div></div>
-          <div class="item"><span class="legend-marker" style="background:#2563EB;margin-top:6px"></span><div><span class="badge badge-verified"><span class="badge-dot"></span>Terverifikasi</span><p>Sedang ditangani.</p></div></div>
-          <div class="item"><span class="legend-marker" style="background:#16A34A;margin-top:6px"></span><div><span class="badge badge-completed"><span class="badge-dot"></span>Selesai Ditangani</span><p>Sudah ditangani.</p></div></div>
-          <div class="item"><span class="legend-marker" style="background:#64748B;margin-top:6px"></span><div><span class="badge badge-rejected"><span class="badge-dot"></span>Ditolak</span><p>Bukan kebakaran / kurang jelas.</p></div></div>
+          <div class="item"><div><span class="badge badge-pending"><span class="badge-dot"></span>Menunggu Verifikasi</span><p>Belum dicek petugas.</p></div></div>
+          <div class="item"><div><span class="badge badge-verified"><span class="badge-dot"></span>Terverifikasi</span><p>Sedang ditangani.</p></div></div>
+          <div class="item"><div><span class="badge badge-completed"><span class="badge-dot"></span>Selesai Ditangani</span><p>Sudah ditangani.</p></div></div>
+          <div class="item"><div><span class="badge badge-rejected"><span class="badge-dot"></span>Ditolak</span><p>Bukan kebakaran / kurang jelas.</p></div></div>
         </div>
       </section>
 
@@ -109,11 +121,11 @@
         <div class="card ai-figure">
           <div>
             <h3 class="card-title" style="font-size:1rem">Angka keyakinan</h3>
-            <p class="card-sub" style="margin-bottom:1rem">Makin tinggi, makin yakin.</p>
+            <p class="card-sub" style="margin-bottom:1rem">Makin tinggi, makin yakin. Angka rendah seperti 31% berarti tanda yang samar, dan petugas tetap memeriksanya.</p>
             <div class="confidence-demo">
-              <div class="conf-row"><span>Api</span><span class="conf-bar"><span style="width:92%;background:linear-gradient(90deg,#DC2626,#F97316)"></span></span><span>92%</span></div>
-              <div class="conf-row"><span>Asap</span><span class="conf-bar"><span style="width:64%;background:#64748B"></span></span><span>64%</span></div>
-              <div class="conf-row"><span>Asap</span><span class="conf-bar"><span style="width:31%;background:#CBD5E1"></span></span><span>31%</span></div>
+              <div class="conf-row"><span>Api</span><span class="conf-bar"><span style="width:92%;background:#95271D"></span></span><span>92%</span></div>
+              <div class="conf-row"><span>Asap</span><span class="conf-bar"><span style="width:64%;background:#B34A44"></span></span><span>64%</span></div>
+              <div class="conf-row"><span>Samar</span><span class="conf-bar"><span style="width:31%;background:#CDBFBB"></span></span><span>31%</span></div>
             </div>
           </div>
           <div class="note-box">

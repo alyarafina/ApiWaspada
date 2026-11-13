@@ -22,6 +22,7 @@ class Officer(Base):
     username = Column(String(64), unique=True, index=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     full_name = Column(String(120), nullable=False, default="Petugas Verifikasi")
-    role = Column(String(32), nullable=False, default="officer")
+    # Peran: admin | operator (Operator JCOC 112) | damkar (Petugas Damkar)
+    role = Column(String(32), nullable=False, default="operator")
     is_active = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)

@@ -3,70 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#1A0F0A" />
-  <meta name="description" content="ApiWaspada — sistem pelaporan dugaan kebakaran Kota Jambi. Pilih masuk sebagai masyarakat atau petugas." />
-  <title>ApiWaspada — Selamat Datang</title>
-  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+  <meta name="theme-color" content="#F6F4F3" />
+  <meta name="description" content="ApiWaspada, pelaporan dugaan kebakaran Kota Jambi. Masuk sebagai warga untuk melapor dan memantau, atau sebagai petugas untuk verifikasi." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="ApiWaspada" />
+  <meta property="og:title" content="ApiWaspada | Selamat Datang" />
+  <meta property="og:description" content="ApiWaspada, pelaporan dugaan kebakaran Kota Jambi. Masuk sebagai warga untuk melapor dan memantau, atau sebagai petugas untuk verifikasi." />
+  <meta property="og:image" content="/assets/images/og-apiwaspada.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>ApiWaspada | Selamat Datang</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
   <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+  <link rel="stylesheet" href="/assets/css/ui-baru.css?v=20261113m" />
 </head>
 <body data-area="gate" data-page="gate">
-  <script src="/assets/js/layout.js?v=20261112q"></script>
+  <a class="skip-link" href="#konten">Lewati ke konten utama</a>
+  <script src="/assets/js/layout.js?v=20261113k"></script>
 
-  <main class="gate">
-    <div class="container gate-top">
-      <a href="/index.html" class="brand" aria-label="ApiWaspada">
-        <svg class="brand-mark" width="38" height="38" viewBox="0 0 48 48" aria-hidden="true">
-          <defs><linearGradient id="gg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#B91C1C"/><stop offset=".55" stop-color="#DC2626"/><stop offset="1" stop-color="#F97316"/></linearGradient></defs>
-          <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#gg)"/>
-          <path d="M24 8c-4.5 6.5-11 11-11 19.2C13 33.4 17.9 38.5 24 38.5S35 33.4 35 27.2c0-4.9-2.8-9.1-5.6-12-.3 3.1-2.2 5-3.9 5.9C26.8 16.8 26.2 11.8 24 8Z" fill="#fff"/>
-        </svg>
-        <span class="brand-text">
-          <span class="brand-name">Api<span>Waspada</span></span>
-          <span class="brand-sub">Kota Jambi</span>
-        </span>
-      </a>
-    </div>
-
-    <div class="container gate-body">
-      <div class="gate-head">
-        <span class="hero-badge"><span class="pin"><i data-icon="pin"></i></span>Siaga Kebakaran Kota Jambi</span>
-        <h1>Selamat datang di <span class="accent">ApiWaspada</span></h1>
-        <p>Anda masuk sebagai?</p>
+  <main id="konten" tabindex="-1" class="gate">
+    <div class="container gate-wrap">
+      <div class="gate-intro">
+        <img src="/assets/images/logo-apiwaspada.png" width="72" height="105" alt="Logo ApiWaspada: pin peta berisi api" />
+        <h1>Api<span>Waspada</span></h1>
+        <p>Pelaporan dugaan kebakaran Kota Jambi. Setiap laporan warga menjadi satu titik di peta, diperiksa AI, lalu diverifikasi petugas.</p>
       </div>
 
-      <div class="gate-choices">
-        <a href="/beranda.html" class="gate-card public">
-          <span class="tag">Untuk umum</span>
-          <span class="icon-tile"><i data-icon="users" class="ic-lg"></i></span>
-          <div>
-            <h2>Masyarakat</h2>
-            <p class="lead-line">Lapor &amp; pantau kebakaran. Tanpa login.</p>
-          </div>
-          <span class="go">Masuk <i data-icon="arrow-right"></i></span>
-        </a>
-
-        <a href="/login.html" class="gate-card officer" id="gateOfficerCard">
-          <span class="tag">Khusus petugas</span>
-          <span class="icon-tile"><i data-icon="shield" class="ic-lg"></i></span>
-          <div>
-            <h2>Petugas</h2>
-            <p class="lead-line">Periksa &amp; verifikasi laporan.</p>
-          </div>
-          <span class="go"><span id="gateOfficerLabel">Login petugas</span> <i data-icon="arrow-right"></i></span>
-        </a>
+      <div class="gate-pick">
+        <h2>Masuk sebagai</h2>
+        <ul class="indeks">
+          <li><a href="/beranda.html"><strong>Warga</strong><span>Laporkan dan pantau kebakaran. Tanpa akun.</span><i data-icon="arrow-right"></i></a></li>
+          <li><a href="/login.html" id="gateOfficerCard"><strong id="gateOfficerLabel">Petugas</strong><span>Periksa dan verifikasi laporan yang masuk.</span><i data-icon="arrow-right"></i></a></li>
+        </ul>
       </div>
     </div>
 
-    <div class="container gate-foot">
-      <div class="gate-emergency">
-        <span>Darurat?</span>
-        <a href="tel:113"><i data-icon="phone"></i> 113 Damkar</a>
-        <a href="tel:112"><i data-icon="phone"></i> 112</a>
-      </div>
-      <p class="gate-copy">&copy; 2026 ApiWaspada Kota Jambi</p>
+    <div class="container gate-emergency-line">
+      <span>Keadaan darurat? Telepon</span>
+      <a href="tel:113" aria-label="Telepon pemadam kebakaran 113">113</a>
+      <span>atau</span>
+      <a href="tel:112" aria-label="Telepon darurat 112">112</a>
+      <span style="margin-left:auto">&copy; 2026 ApiWaspada Kota Jambi</span>
     </div>
   </main>
 
@@ -78,7 +60,7 @@
         var key = (window.APIWASPADA_CONFIG && window.APIWASPADA_CONFIG.TOKEN_STORAGE_KEY) || "apiwaspada_officer_token";
         if (localStorage.getItem(key)) {
           document.getElementById("gateOfficerCard").setAttribute("href", "/dashboard.html");
-          document.getElementById("gateOfficerLabel").textContent = "Lanjut ke dashboard";
+          document.getElementById("gateOfficerLabel").textContent = "Petugas: lanjut ke dashboard";
         }
       } catch (e) { /* abaikan */ }
     });

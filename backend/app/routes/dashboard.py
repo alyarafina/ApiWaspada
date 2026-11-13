@@ -7,7 +7,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Path, Query, status
 
 from backend.app.database import Session, get_db
-from backend.app.dependencies import get_current_officer
+from backend.app.dependencies import get_operator
 from backend.app.models.user import Officer
 from backend.app.schemas.dashboard import (
     DashboardReportsResponse,
@@ -35,7 +35,7 @@ router = APIRouter(prefix="/api/dashboard", tags=["Officer Dashboard & GIS"])
     summary="Ambil statistik laporan untuk kartu ringkasan dan grafik Chart.js (Petugas)",
 )
 def dashboard_stats_endpoint(
-    current_officer: Officer = Depends(get_current_officer),
+    current_officer: Officer = Depends(get_operator),
     db: Session = Depends(get_db),
 ) -> DashboardStatsResponse:
     """Mengembalikan statistik laporan nyata dari database SQLite untuk dashboard petugas."""
@@ -64,7 +64,7 @@ def dashboard_reports_endpoint(
     ),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=10, ge=1, le=100),
-    current_officer: Officer = Depends(get_current_officer),
+    current_officer: Officer = Depends(get_operator),
     db: Session = Depends(get_db),
 ) -> DashboardReportsResponse:
     """Mengambil data laporan lengkap untuk tabel manajemen petugas."""
@@ -88,7 +88,7 @@ def dashboard_reports_endpoint(
 )
 def dashboard_report_detail_endpoint(
     report_id: str = Path(..., description="ID numerik atau kode pelacakan laporan"),
-    current_officer: Officer = Depends(get_current_officer),
+    current_officer: Officer = Depends(get_operator),
     db: Session = Depends(get_db),
 ) -> ReportOfficerResponse:
     """Mengembalikan detail lengkap laporan untuk halaman pemeriksaan petugas."""
