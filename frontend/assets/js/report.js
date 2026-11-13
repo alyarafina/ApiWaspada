@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (status.ai_available) {
         aiStatusBanner.className = "alert alert-success";
         aiStatusBanner.innerHTML =
-          `<span><strong>AI aktif</strong> &mdash; foto dicek otomatis.</span>`;
+          `<span><strong>AI aktif.</strong> Foto diperiksa otomatis.</span>`;
       } else {
         aiStatusBanner.className = "alert alert-info";
         aiStatusBanner.innerHTML =

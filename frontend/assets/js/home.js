@@ -29,18 +29,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     try {
       const health = await apiFetch("/api/health");
       const healthy = health.status === "healthy";
-      setText(sysText, healthy ? "Online" : "Terbatas");
+      setText(sysText, healthy ? "online" : "terbatas");
       setDot(sysDot, healthy ? "ok" : "warn");
 
       const aiOn = !!(health.ai_status && health.ai_status.ai_available);
-      setText(aiText, aiOn ? "Aktif" : "Belum aktif");
+      setText(aiText, aiOn ? "aktif" : "belum aktif");
       setDot(aiDot, aiOn ? "ok" : "warn");
 
       setText(totalEl, Number(health.total_reports || 0).toLocaleString("id-ID"));
     } catch (err) {
-      setText(sysText, "Offline");
+      setText(sysText, "offline");
       setDot(sysDot, "off");
-      setText(aiText, "Tidak diketahui");
+      setText(aiText, "tidak diketahui");
       setDot(aiDot, "off");
       setDot(liveDot, "off");
       console.warn("Gagal memeriksa status sistem:", err);
@@ -83,15 +83,31 @@ document.addEventListener("DOMContentLoaded", async function () {
   const mapEl = document.getElementById("landingMap");
   if (!mapEl || !window.L) return;
 
-  const map = L.map("landingMap", { scrollWheelZoom: false }).setView(
-    [cfg.DEFAULT_LAT, cfg.DEFAULT_LNG],
-    cfg.DEFAULT_ZOOM
-  );
+  // Di HP: satu jari tetap menggulir halaman (peta digeser dengan dua jari / tombol zoom)
+  const isTouch = window.matchMedia("(pointer: coarse)").matches;
+  const map = L.map("landingMap", {
+    scrollWheelZoom: false,
+    dragging: !isTouch,
+    tap: false,
+    keyboard: true,
+  }).setView([cfg.DEFAULT_LAT, cfg.DEFAULT_LNG], cfg.DEFAULT_ZOOM);
   window.ApiWaspadaMap.initBaseTileLayers(map);
+  window.ApiWaspadaMap.lockToJambi(map);
+
+  // Pin pusat pantau: logo ApiWaspada + cincin denyut di koordinat pusat Kota Jambi
+  L.marker([cfg.DEFAULT_LAT, cfg.DEFAULT_LNG], {
+    icon: L.divIcon({
+      className: "titik-pusat",
+      html: '<span class="ring" aria-hidden="true"></span><span class="ring" aria-hidden="true"></span><img src="/assets/images/logo-apiwaspada-96.png" alt="" width="44" height="64" />',
+      iconSize: [44, 64],
+      iconAnchor: [22, 62],
+    }),
+    interactive: false,
+    keyboard: false,
+    zIndexOffset: -100,
+  }).addTo(map);
+
   const group = L.layerGroup().addTo(map);
-  map.on("focus click", function () {
-    map.scrollWheelZoom.enable();
-  });
 
   try {
     const data = await apiFetch("/api/dashboard/map");
@@ -102,6 +118,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     setText("heroCountActive", countBy("verified"));
     setText("heroCountDone", countBy("completed"));
     if (mapCountEl) mapCountEl.textContent = markers.length.toLocaleString("id-ID");
+    if (markers.length === 0) {
+      // Keadaan kosong yang jujur: tanpa deretan angka nol, tanpa titik contoh palsu
+      const total = document.querySelector(".map-total");
+      if (total) total.innerHTML = '<span class="status-dot ok"></span> Belum ada titik aktif. Laporan pertama Anda akan muncul di sini.';
+      const chips = document.querySelector(".map-cap .count-chips");
+      if (chips) chips.innerHTML = '<a href="/report.html" class="arrow-link">Kirim titik pertama <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>';
+    }
     window.ApiWaspadaMap.renderReportsDistributionMap(map, group, markers, false);
   } catch (err) {
     if (mapCountEl) mapCountEl.textContent = "0";

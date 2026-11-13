@@ -50,3 +50,38 @@ def get_current_officer(
         )
 
     return officer
+
+
+# ---------------------------------------------------------------------------
+# Peran akun: admin, operator (Operator JCOC 112), damkar (Petugas Damkar).
+# Akun lama berperan "officer" diperlakukan sebagai operator.
+# ---------------------------------------------------------------------------
+ROLE_ALIASES = {"officer": "operator"}
+VALID_ROLES = ("admin", "operator", "damkar")
+
+
+def normalized_role(officer: Officer) -> str:
+    role = (officer.role or "operator").strip().lower()
+    return ROLE_ALIASES.get(role, role)
+
+
+def require_roles(*roles: str):
+    """Dependency: hanya akun dengan salah satu peran ini yang boleh lewat."""
+    allowed = set(roles)
+
+    def _checker(officer: Officer = Depends(get_current_officer)) -> Officer:
+        if normalized_role(officer) not in allowed:
+            from fastapi import HTTPException, status
+
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Akun Anda tidak memiliki akses ke fitur ini.",
+            )
+        return officer
+
+    return _checker
+
+
+get_operator = require_roles("operator", "admin")
+get_damkar = require_roles("damkar")
+get_admin = require_roles("admin")

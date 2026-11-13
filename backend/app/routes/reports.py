@@ -6,7 +6,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, File, Form, Path, Query, UploadFile, status
 
 from backend.app.database import Session, get_db
-from backend.app.dependencies import get_current_officer
+from backend.app.dependencies import get_operator
 from backend.app.models.user import Officer
 from backend.app.routes.detect import resolve_model_or_400
 from backend.app.schemas.report import (
@@ -121,7 +121,7 @@ def get_single_report_endpoint(
 def patch_report_status_endpoint(
     payload: ReportStatusUpdateRequest,
     report_id: str = Path(..., description="ID numerik laporan atau kode pelacakan"),
-    current_officer: Officer = Depends(get_current_officer),
+    current_officer: Officer = Depends(get_operator),
     db: Session = Depends(get_db),
 ) -> ReportOfficerResponse:
     """

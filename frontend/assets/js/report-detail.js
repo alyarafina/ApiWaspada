@@ -92,6 +92,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function renderReportDetail(report) {
+    if (window.AWProgress) window.AWProgress.renderProgressTimeline(document.getElementById("detProgressTimeline"), report);
+    document.dispatchEvent(new CustomEvent("aw:report-loaded", { detail: report }));
     detReportTitle.textContent = `Detail Laporan #${report.id}`;
     detTrackingCode.textContent = report.tracking_code;
     detStatusBadge.innerHTML = getStatusBadgeHtml(report.status);

@@ -13,6 +13,7 @@ from backend.app.core.security import (
 )
 from backend.app.database import Session
 from backend.app.models.user import Officer
+from backend.app.dependencies import normalized_role
 from backend.app.schemas.auth import OfficerProfileResponse, TokenResponse
 
 
@@ -57,7 +58,7 @@ def authenticate_officer(db: Session, username: str, password: str) -> TokenResp
 
     token = create_access_token(
         subject=officer.username,
-        role=officer.role,
+        role=normalized_role(officer),
         full_name=officer.full_name,
         expires_minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
     )
@@ -65,10 +66,15 @@ def authenticate_officer(db: Session, username: str, password: str) -> TokenResp
         access_token=token,
         token_type="bearer",
         expires_in_minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
-        officer=OfficerProfileResponse(
-            id=officer.id,
-            username=officer.username,
-            full_name=officer.full_name,
-            role=officer.role,
-        ),
+        officer=build_profile(db, officer),
+    )
+
+
+def build_profile(db: Session, officer: Officer) -> OfficerProfileResponse:
+    """Profil akun beserta peran ternormalisasi."""
+    return OfficerProfileResponse(
+        id=officer.id,
+        username=officer.username,
+        full_name=officer.full_name,
+        role=normalized_role(officer),
     )

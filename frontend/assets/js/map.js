@@ -11,6 +11,7 @@
 const STATUS_MARKER_COLORS = {
   pending: "#F59E0B",
   verified: "#2563EB",
+  handling: "#95271D",
   rejected: "#64748B",
   completed: "#16A34A",
 };
@@ -57,6 +58,28 @@ function initBaseTileLayers(mapInstance) {
       { position: "topright" }
     )
     .addTo(mapInstance);
+  const toggle = mapInstance.getContainer().querySelector(".leaflet-control-layers-toggle");
+  if (toggle) {
+    toggle.setAttribute("role", "button");
+    toggle.setAttribute("aria-label", "Ganti lapisan peta");
+    toggle.setAttribute("title", "Ganti lapisan peta");
+  }
+}
+
+/**
+ * Kunci peta ke wilayah Kota Jambi: zoom minimal 10, tidak bisa digeser jauh keluar kota,
+ * dan roda mouse baru aktif setelah peta diklik (menggulir halaman tidak ikut men-zoom peta).
+ */
+function lockToJambi(map) {
+  const cfg = window.APIWASPADA_CONFIG;
+  const lat = cfg.DEFAULT_LAT, lng = cfg.DEFAULT_LNG;
+  map.setMinZoom(10);
+  map.setMaxBounds([[lat - 0.55, lng - 0.75], [lat + 0.55, lng + 0.75]]);
+  map.options.maxBoundsViscosity = 0.9;
+  map.scrollWheelZoom.disable();
+  map.on("click focus", () => map.scrollWheelZoom.enable());
+  map.on("mouseout blur", () => map.scrollWheelZoom.disable());
+  return map;
 }
 
 function initReportPickerMap(containerId, onLocationSelected) {
@@ -66,6 +89,7 @@ function initReportPickerMap(containerId, onLocationSelected) {
     cfg.DEFAULT_ZOOM
   );
   initBaseTileLayers(map);
+  lockToJambi(map);
 
   let activeMarker = null;
 
@@ -148,8 +172,8 @@ function renderReportsDistributionMap(mapInstance, markersGroup, markersData, is
         <div style="margin-bottom:8px;">
           ${window.ApiWaspadaUtils.getStatusBadgeHtml(item.status)}
         </div>
-        <a href="${detailUrl}" style="display:inline-block; font-weight:700; color:#DC2626; text-decoration:underline;">
-          Lihat Detail Laporan &rarr;
+        <a href="${detailUrl}" style="display:inline-block; font-weight:700; color:#95271D; text-decoration:underline;">
+          Lihat detail laporan
         </a>
       </div>
     `;
@@ -169,5 +193,6 @@ window.ApiWaspadaMap = {
   createColoredPinIcon,
   initBaseTileLayers,
   initReportPickerMap,
+  lockToJambi,
   renderReportsDistributionMap,
 };

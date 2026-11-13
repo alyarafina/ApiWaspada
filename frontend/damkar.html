@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#F6F4F3" />
+  <meta name="robots" content="noindex" />
+  <title>Tugas Damkar | ApiWaspada Kota Jambi</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/assets/images/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" />
+  <link rel="stylesheet" href="/assets/css/style.css?v=20261112q" />
+  <link rel="stylesheet" href="/assets/css/ui-baru.css?v=20261113m" />
+</head>
+<body data-area="officer" data-page="damkar">
+  <a class="skip-link" href="#konten">Lewati ke konten utama</a>
+  <script src="/assets/js/layout.js?v=20261113k"></script>
+
+  <main id="konten" tabindex="-1">
+    <div class="container">
+      <header class="dash-head">
+        <div>
+          <p class="hero-titik__place"><i data-icon="pin"></i> Kota Jambi</p>
+          <h1>Tugas Damkar</h1>
+          <p>Laporan yang ditugaskan Operator JCOC 112 kepada Anda. Buka rute, bagikan lokasi ke rekan, lalu catat setiap tahap dari HP.</p>
+        </div>
+        <div class="dash-actions">
+          <label class="check-inline"><input type="checkbox" id="showDone" /> Tampilkan yang selesai</label>
+          <button type="button" id="btnRefreshTasks" class="btn btn-secondary btn-sm"><i data-icon="refresh"></i> Segarkan</button>
+        </div>
+      </header>
+
+      <div id="damkarAlert" class="alert hidden" role="status"></div>
+      <div id="taskList" class="task-list" aria-live="polite">
+        <p class="form-hint">Memuat tugas&hellip;</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="/assets/js/config.js?v=20261112q"></script>
+  <script src="/assets/js/utils.js?v=20261113k"></script>
+  <script src="/assets/js/auth.js?v=20261113k"></script>
+  <script src="/assets/js/progress-ui.js?v=20261113k"></script>
+  <script src="/assets/js/damkar.js?v=20261113m"></script>
+</body>
+</html>

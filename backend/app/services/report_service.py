@@ -30,6 +30,7 @@ from backend.app.utils.geo_validator import check_jambi_bounds, validate_coordin
 STATUS_LABELS_ID = {
     "pending": "Menunggu Verifikasi Petugas",
     "verified": "Terverifikasi (Ditindaklanjuti)",
+    "handling": "Ditangani Tim Damkar",
     "rejected": "Ditolak / Tidak Valid",
     "completed": "Penanganan Selesai",
 }
@@ -73,8 +74,34 @@ def to_public_response(report: Report) -> ReportPublicResponse:
         created_at=report.created_at,
         updated_at=report.updated_at,
         region_info=check_jambi_bounds(report.latitude, report.longitude),
+        progress=_progress_items(report),
         disclaimer=AI_DISCLAIMER_TEXT,
     )
+
+
+def _progress_items(report: Report) -> list:
+    """Tahapan penanganan Damkar untuk laporan ini (sesi DB diambil dari objek report)."""
+    from sqlalchemy.orm import object_session
+
+    from backend.app.models.progress import PROGRESS_STAGE_LABELS, ReportProgress
+    from backend.app.schemas.report import ProgressItem
+
+    db = object_session(report)
+    if db is None:
+        return []
+    rows = (
+        db.query(ReportProgress)
+        .filter(ReportProgress.report_id == report.id)
+        .order_by(ReportProgress.created_at.asc())
+        .all()
+    )
+    return [
+        ProgressItem(
+            id=r.id, stage=r.stage, stage_label=PROGRESS_STAGE_LABELS.get(r.stage, r.stage),
+            note=r.note or "", photo_url=r.photo_path, created_at=r.created_at,
+        )
+        for r in rows
+    ]
 
 
 def to_officer_response(report: Report, db: Optional[Session] = None) -> ReportOfficerResponse:
@@ -105,7 +132,28 @@ def to_officer_response(report: Report, db: Optional[Session] = None) -> ReportO
         reporter_name=report.reporter_name or "Masyarakat",
         ai_model_used=report.ai_model_used or "none",
         histories=history_items,
+        assigned_officers=_assigned_officers(report),
     )
+
+
+def _assigned_officers(report: Report) -> list:
+    """Petugas Damkar yang ditugaskan untuk laporan ini."""
+    from sqlalchemy.orm import object_session
+
+    from backend.app.models.assignment import ReportAssignment
+    from backend.app.models.user import Officer
+
+    db = object_session(report)
+    if db is None:
+        return []
+    rows = (
+        db.query(Officer)
+        .join(ReportAssignment, ReportAssignment.officer_id == Officer.id)
+        .filter(ReportAssignment.report_id == report.id)
+        .order_by(Officer.full_name.asc())
+        .all()
+    )
+    return [{"id": o.id, "username": o.username, "full_name": o.full_name} for o in rows]
 
 
 def create_new_report(

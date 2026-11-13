@@ -84,10 +84,10 @@ def build_model_registry() -> Dict[str, ModelSpec]:
     """
     weights_dir = settings.BASE_DIR / "ml" / "weights"
     specs = [
-        ModelSpec("fire_n", "YOLOv8 Nano", "Paling cepat & ringan (mAP@50 0.787)", weights_dir / "fire_n.pt"),
-        ModelSpec("fire_m", "YOLOv8 Medium", "Seimbang, disarankan (mAP@50 0.801)", weights_dir / "fire_m.pt"),
-        ModelSpec("fire_l", "YOLOv8 Large", "Paling akurat, paling berat (mAP@50 0.812)", weights_dir / "fire_l.pt"),
-        ModelSpec("best", "Model kustom", "Hasil pelatihan sendiri (best.pt)", settings.YOLO_MODEL_PATH),
+        ModelSpec("fire_n", "Cepat (YOLOv8 Nano)", "Hasil paling cepat, cocok saat sinyal lemah.", weights_dir / "fire_n.pt"),
+        ModelSpec("fire_m", "Seimbang (YOLOv8 Medium)", "Disarankan: cukup cepat dan teliti.", weights_dir / "fire_m.pt"),
+        ModelSpec("fire_l", "Paling teliti (YOLOv8 Large)", "Paling teliti, butuh waktu sedikit lebih lama.", weights_dir / "fire_l.pt"),
+        ModelSpec("best", "Model kustom", "Model hasil pelatihan tim ApiWaspada.", settings.YOLO_MODEL_PATH),
     ]
     return {s.key: s for s in specs}
 

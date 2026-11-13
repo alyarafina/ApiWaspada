@@ -41,7 +41,8 @@ def get_dashboard_statistics(db: Session) -> DashboardStatsResponse:
     total = len(all_reports)
     status_counts = Counter(r.status for r in all_reports)
     pending_count = status_counts.get("pending", 0)
-    verified_count = status_counts.get("verified", 0)
+    # "Diverifikasi" mencakup laporan yang sedang ditangani Tim Damkar
+    verified_count = status_counts.get("verified", 0) + status_counts.get("handling", 0)
     rejected_count = status_counts.get("rejected", 0)
     completed_count = status_counts.get("completed", 0)
 
@@ -50,6 +51,7 @@ def get_dashboard_statistics(db: Session) -> DashboardStatsResponse:
         "verified": verified_count,
         "rejected": rejected_count,
         "completed": completed_count,
+        "handling": status_counts.get("handling", 0),
     }
 
     det_counts = Counter(r.detection_result for r in all_reports)
