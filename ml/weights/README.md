@@ -1,12 +1,22 @@
-# Direktori Penyimpanan Model Bobot YOLO (`ml/weights/`)
+# Model bobot YOLO (`ml/weights/`)
 
-Tempatkan file hasil pelatihan model terbaik Anda dengan nama:
+File model disimpan lewat **Git LFS** (lihat `.gitattributes`). Setelah clone, jalankan
+`git lfs pull` bila file `.pt` masih berupa penunjuk kecil (sekitar 130 byte).
 
-```
-ml/weights/best.pt
-```
+| File | Ukuran | Keterangan | Kunci di aplikasi |
+|---|---|---|---|
+| `fire_n.pt` | 6 MB | YOLOv8 Nano, D-Fire Dataset. Paling cepat. | `fire_n` |
+| `fire_m.pt` | 52 MB | YOLOv8 Medium, D-Fire Dataset. Seimbang, model default. | `fire_m` |
+| `fire_l.pt` | 88 MB | YOLOv8 Large, D-Fire Dataset. Paling teliti. | `fire_l` |
+| `best.pt` | 6 MB | Model hasil pelatihan tim ApiWaspada (`ml/train.py` / notebook). | `best` |
 
-## Kebijakan Integritas Model
-- Aplikasi **ApiWaspada** **tidak menyertakan file `best.pt` palsu atau kosong**.
-- Apabila `ml/weights/best.pt` belum tersedia di folder ini, backend FastAPI (`backend/app/services/ai_service.py`) secara otomatis berjalan dalam **Mode AI Belum Aktif (Graceful Fallback)** dan menampilkan status `"Deteksi gagal atau model belum tersedia"` secara transparan kepada pengguna maupun petugas.
-- Setelah Anda menjalankan pelatihan melalui `ml/ApiWaspada_Training_YOLO.ipynb` atau `python ml/train.py`, bobot terbaik (`best.pt`) akan otomatis disalin ke folder ini dan modul deteksi AI pada aplikasi web akan langsung aktif tanpa perlu mengubah kode sumber.
+Model default diatur dengan `YOLO_DEFAULT_MODEL` di `.env` (bawaan: `fire_m`).
+
+## Sumber dan lisensi
+
+`fire_n.pt`, `fire_m.pt`, dan `fire_l.pt` berasal dari repositori
+*wildfire-detection* karya Alim Tleuliyev (demo: wildfire-detection.streamlit.app),
+dilatih pada D-Fire Dataset, dan dirilis dengan lisensi MIT. Teks lisensi lengkap ada di
+`LICENSE-fire-models.txt` dan wajib disertakan setiap kali file ini dibagikan.
+
+`best.pt` adalah hasil pelatihan sendiri.

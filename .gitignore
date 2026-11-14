@@ -29,6 +29,11 @@ ml/DFireDataset/
 ml/runs/
 ml/outputs/
 ml/weights/*.pt
+!ml/weights/best.pt
+!ml/weights/fire_n.pt
+!ml/weights/fire_m.pt
+!ml/weights/fire_l.pt
+!ml/weights/LICENSE-fire-models.txt
 !ml/weights/README.md
 
 # Jupyter Notebook Checkpoints
